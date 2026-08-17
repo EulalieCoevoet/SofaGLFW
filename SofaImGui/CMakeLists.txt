@@ -144,6 +144,7 @@ set(HEADER_FILES
     ${SOFAIMGUI_SOURCE_DIR}/menus/ViewMenu.h
 
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/Action.h
+    ${SOFAIMGUI_SOURCE_DIR}/models/actions/Custom.h
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/Move.h
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/Pick.h
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/StartMove.h
@@ -204,6 +205,7 @@ set(SOURCE_FILES
     ${SOFAIMGUI_SOURCE_DIR}/menus/ViewMenu.cpp
 
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/Action.cpp
+    ${SOFAIMGUI_SOURCE_DIR}/models/actions/Custom.cpp
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/Move.cpp
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/Pick.cpp
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/StartMove.cpp
@@ -211,6 +213,7 @@ set(SOURCE_FILES
     ${SOFAIMGUI_SOURCE_DIR}/models/modifiers/Modifier.cpp
     ${SOFAIMGUI_SOURCE_DIR}/models/modifiers/Repeat.cpp
 
+    ${SOFAIMGUI_SOURCE_DIR}/models/actions/views/CustomView.cpp
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/views/MoveView.cpp
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/views/PickView.cpp
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/views/StartMoveView.cpp

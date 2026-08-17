@@ -22,10 +22,11 @@
 
 #include "GUIColors.h"
 #include <SofaImGui/windows/ProgramWindow.h>
-#include <SofaImGui/models/actions/Action.h>
 #include <SofaImGui/Utils.h>
 #include <SofaImGui/widgets/Widgets.h>
 
+#include <SofaImGui/models/actions/Action.h>
+#include <SofaImGui/models/actions/Custom.h>
 #include <SofaImGui/models/actions/Move.h>
 #include <SofaImGui/models/actions/Pick.h>
 #include <SofaImGui/models/actions/Wait.h>
@@ -528,6 +529,7 @@ bool ProgramWindow::showTrackButtons(const int &trackIndex, const char* const me
 void ProgramWindow::showBlocks(std::shared_ptr<models::Track> track,
                                const int& trackIndex)
 {
+    ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::GetColorU32(COLOR_WHITE));
     float blockHeight = ProgramSizes().TrackHeight;
 
     showStartMoveBlock(blockHeight, trackIndex, track);
@@ -541,6 +543,7 @@ void ProgramWindow::showBlocks(std::shared_ptr<models::Track> track,
     ImGui::GetCurrentWindow()->DC.CursorPosPrevLine.y = y;
 
     showActionBlocks(blockHeight, trackIndex, track);
+    ImGui::PopStyleColor();
 }
 
 void ProgramWindow::showStartMoveBlock(const float& blockHeight,
@@ -1143,6 +1146,13 @@ bool ProgramWindow::addAddActionMenu(std::shared_ptr<models::Track> track, const
     {
         auto wait = std::make_shared<models::actions::Wait>();
         wait->insertInTrack(track, actionIndex);
+        return true;
+    }
+
+    if (ImGui::MenuItem(("Custom##" + std::to_string(trackIndex)).c_str()))
+    {
+        auto custom = std::make_shared<models::actions::Custom>();
+        custom->insertInTrack(track, actionIndex);
         return true;
     }
 
