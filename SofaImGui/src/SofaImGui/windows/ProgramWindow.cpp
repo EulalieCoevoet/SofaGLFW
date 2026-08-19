@@ -68,7 +68,7 @@ std::string ProgramWindow::getDescription()
 
 void ProgramWindow::clear()
 {
-    if (isEnabledByState())
+    if (m_program.isValid())
         m_program.clearTracks();
 }
 
@@ -112,12 +112,6 @@ void ProgramWindow::internalShowWindow()
         }
         ProgramSizes().InputWidth = ImGui::CalcTextSize("10000").x;
         ProgramSizes().AlignWidth = ImGui::CalcTextSize("iterations    ").x;
-
-        if (!isEnabledInWorkbench())
-        {
-            ImGui::BeginDisabled();
-            showInfoMessage("This window is disabled in the active workbench.");
-        }
 
         showProgramButtons();
 
@@ -167,9 +161,6 @@ void ProgramWindow::internalShowWindow()
         }
         else
             zoomCoef = defaultZoomCoef;
-
-        if (!isEnabledInWorkbench())
-            ImGui::EndDisabled();
     }
     else
     {
@@ -415,7 +406,6 @@ int ProgramWindow::showTracks()
 
         ImGui::SameLine();
         m_trackBeginPos = ImGui::GetCurrentWindow()->DC.CursorPos;
-        m_trackBeginPos.x += ProgramSizes().StartMoveBlockSize;
         showBlocks(track, trackIndex);
 
         float x = ImGui::GetCurrentWindow()->DC.CursorPosPrevLine.x ;
@@ -532,7 +522,11 @@ void ProgramWindow::showBlocks(std::shared_ptr<models::Track> track,
     ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::GetColorU32(COLOR_WHITE));
     float blockHeight = ProgramSizes().TrackHeight;
 
-    showStartMoveBlock(blockHeight, trackIndex, track);
+    if (m_kinematicsGUIDataManager->hasTCP())
+    {
+        m_trackBeginPos.x += ProgramSizes().StartMoveBlockSize;
+        showStartMoveBlock(blockHeight, trackIndex, track);
+    }
 
     float x = ImGui::GetCurrentWindow()->DC.CursorPosPrevLine.x ;
     float y = ImGui::GetCurrentWindow()->DC.CursorPosPrevLine.y ;
@@ -882,10 +876,11 @@ void ProgramWindow::stepProgram(const double &dt, const bool &reverse)
                 blockEnd += action->getDuration();
                 if ((!reverse && (blockEnd - m_time) > eps) || (reverse && (blockEnd - m_time - dt) > eps))
                 {
-                    RigidCoord position = m_kinematicsGUIDataManager->getTCPGUIData()->getTCPPosition();
+                    RigidCoord position = (m_kinematicsGUIDataManager->hasTCP())? m_kinematicsGUIDataManager->getTCPGUIData()->getTCPPosition() : RigidCoord();
                     if (action->apply(position, m_time + dt - blockStart)) // apply the time corresponding to the end of the time step
                     {
-                        m_kinematicsGUIDataManager->getTCPGUIData()->setTCPTargetPosition(position);
+                        if (m_kinematicsGUIDataManager->hasTCP())
+                            m_kinematicsGUIDataManager->getTCPGUIData()->setTCPTargetPosition(position);
                     }
                     break;
                 }
@@ -1115,7 +1110,7 @@ sofa::Index ProgramWindow::addActionBlockMenu(const std::string& menuLabel,
 
 bool ProgramWindow::addAddActionMenu(std::shared_ptr<models::Track> track, const int &trackIndex, const int &actionIndex)
 {
-    if (ImGui::MenuItem(("Move##" + std::to_string(trackIndex)).c_str()))
+    if (m_kinematicsGUIDataManager->hasTCP() && ImGui::MenuItem(("Move##" + std::to_string(trackIndex)).c_str()))
     {
         auto move = std::make_shared<models::actions::Move>(RigidCoord(),
                                                             m_kinematicsGUIDataManager->getTCPGUIData()->getTCPTargetPosition(),
