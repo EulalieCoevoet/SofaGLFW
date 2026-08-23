@@ -30,7 +30,8 @@
 namespace sofaimgui::models::actions {
 
 bool Move::MoveView::showBlock(const std::string &label,
-                               const ImVec2 &size)
+                               const ImVec2 &size,
+                               bool* selected)
 {
     bool hasValuesChanged = false;
     ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -42,7 +43,7 @@ bool Move::MoveView::showBlock(const std::string &label,
     ImRect bb(ImVec2(x, y), ImVec2(x + size.x, y + size.y));
     ImVec2 topRight = ImVec2(x + size.x, y);
 
-    ImGui::ActionBlock(label.c_str(), bb, ProgramColors().MoveBlockBg);
+    ImGui::ActionBlock(label.c_str(), bb, ProgramColors().MoveBlockBg, selected);
 
     if (ImGui::IsItemHovered())
         move.highlightTrajectory(true);

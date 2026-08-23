@@ -26,6 +26,7 @@ struct ProgramSizes
     inline static float AlignWidth = 0.;
     inline static float TimelineOneSecondSize = 0.;
     inline static float StartMoveBlockSize = 0.;
+    inline static float BlockSelectionSize = 4.;
 };
 
 }

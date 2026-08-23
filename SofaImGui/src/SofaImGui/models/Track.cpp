@@ -101,6 +101,25 @@ void Track::swapActions(const sofa::Index& actionIndex1, const sofa::Index& acti
     }
 }
 
+bool Track::isSelected(sofa::Index index)
+{
+    return (m_selectedActions.first == (int)index || (m_selectedActions.first <= (int)index && (int)index <= m_selectedActions.second));
+}
+
+void Track::setSelected(sofa::Index index)
+{
+    if (ImGui::IsKeyDown(ImGuiKey_LeftShift) &&
+        m_selectedActions.first != -1 &&
+        m_selectedActions.second == -1 &&
+        m_selectedActions.first < (int)index)
+        m_selectedActions.second = index;
+    else
+    {
+        m_selectedActions.first = index;
+        m_selectedActions.second = -1;
+    }
+}
+
 } // namespace
 
 

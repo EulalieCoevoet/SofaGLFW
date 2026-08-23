@@ -30,7 +30,8 @@
 namespace sofaimgui::models::actions {
 
 bool StartMove::StartMoveView::showBlock(const std::string &label,
-                                         const ImVec2 &size)
+                                         const ImVec2 &size,
+                                         bool *selected)
 {
     bool hasValuesChanged = false;
     ImGuiWindow* window = ImGui::GetCurrentWindow();
@@ -42,7 +43,7 @@ bool StartMove::StartMoveView::showBlock(const std::string &label,
     ImRect bb(ImVec2(x, y), ImVec2(x + size.x, y + size.y));
     ImVec2 topRight = ImVec2(x + size.x, y);
 
-    ImGui::ActionBlock(label.c_str(), bb, ProgramColors().StartMoveBlockBg);
+    ImGui::ActionBlock(label.c_str(), bb, ProgramColors().StartMoveBlockBg, selected);
 
     ImVec2 padding(ImGui::GetStyle().FramePadding);
     ImVec2 spacing(ImGui::GetStyle().ItemSpacing);

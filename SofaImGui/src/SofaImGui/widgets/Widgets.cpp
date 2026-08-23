@@ -2,6 +2,7 @@
 #include "IconsFontAwesome6.h"
 #include <sofa/helper/logging/Messaging.h>
 #include <SofaImGui/widgets/Widgets.h>
+#include <ProgramStyle.h>
 #include <string>
 
 
@@ -236,7 +237,7 @@ void LocalTextLinkOpenURL(const char* label, const char* url)
     TextLinkOpenURL(_label.c_str(), url);
 }
 
-void Block(const char* label, const ImRect &bb, const ImVec4 &color, const float &offset)
+void Block(const char* label, const ImRect &bb, const ImVec4 &color, const float &offset, bool* selected)
 {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
 
@@ -245,6 +246,19 @@ void Block(const char* label, const ImRect &bb, const ImVec4 &color, const float
     const ImGuiID id = ImGui::GetID(label);
     if (!ImGui::ItemAdd(blockbb, id))
         return;
+
+    // Block selection
+    if (selected)
+    {
+        bool show = ImGui::IsItemClicked(ImGuiMouseButton_Left) || *selected;
+        *selected = ImGui::IsItemClicked(ImGuiMouseButton_Left);
+        if (show)
+            drawList->AddRect(ImVec2(bb.Min.x, bb.Min.y - offset),
+                              ImVec2(bb.Max.x, bb.Max.y),
+                              COLOR_LIGHT_BLUE,
+                              ImGui::GetStyle().FrameRounding,
+                              ImDrawFlags_None, sofaimgui::ProgramSizes().BlockSelectionSize);
+    }
 
     { // Block background
         drawList->AddRectFilled(ImVec2(bb.Min.x, bb.Min.y - offset),
@@ -267,9 +281,9 @@ void Block(const char* label, const ImRect &bb, const ImVec4 &color, const float
     }
 }
 
-void ActionBlock(const char* label, const ImRect &bb, const ImVec4 &color)
+void ActionBlock(const char* label, const ImRect &bb, const ImVec4 &color, bool *selected)
 {
-    Block(label, bb, color, 0.);
+    Block(label, bb, color, 0., selected);
 }
 
 void ModifierBlock(const char* label, const ImRect &bb, double *dragleft, double *dragright, const ImVec4 &color)

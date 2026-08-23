@@ -588,10 +588,14 @@ void ProgramWindow::showActionBlocks(const float& blockHeight,
 {
     const std::vector<std::shared_ptr<models::actions::Action>> &actions = track->getActions();
     sofa::Index actionIndex = 0;
+    if (!ImGui::IsWindowFocused())
+        track->clearSelected();
 
     while(actionIndex < actions.size())
     {
         std::shared_ptr<models::actions::Action> action = actions[actionIndex];
+        bool isSelected = track->isSelected(actionIndex);
+
         float blockWidth = (m_ws_timeBasedDisplay? action->getDuration(): 1.f) * ProgramSizes().TimelineOneSecondSize - ImGui::GetStyle().ItemSpacing.x;
         std::string blockLabel = "##Action" + std::to_string(trackIndex) + std::to_string(actionIndex);
         std::string menuLabel = std::string("##OptionsMenu" + blockLabel);
@@ -606,15 +610,18 @@ void ProgramWindow::showActionBlocks(const float& blockHeight,
         if (move)
         {
             move->setDrawTrajectory(m_ws_drawTrajectory);
-            if(move->getView()->showBlock(blockLabel, blockSize))
+            if(move->getView()->showBlock(blockLabel, blockSize, &isSelected))
             {
                 track->updateNextMoveInitialPoint(actionIndex, move->getWaypoint());
             }
         }
         else
         {
-            action->getView()->showBlock(blockLabel, blockSize);
+            action->getView()->showBlock(blockLabel, blockSize, &isSelected);
         }
+
+        if (isSelected)
+            track->setSelected(actionIndex);
 
         actionIndex = addActionBlockMenu(menuLabel, actionIndex, trackIndex, track, action);
         if (blockWidth > ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x * 2.0f)

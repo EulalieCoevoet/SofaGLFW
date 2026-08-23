@@ -65,10 +65,15 @@ class Track
 
     void swapActions(const sofa::Index& actionIndex1, const sofa::Index& actionIndex2);
 
+    bool isSelected(sofa::Index index);
+    void setSelected(sofa::Index index);
+    void clearSelected() {m_selectedActions.first=-1; m_selectedActions.second=-1;}
+
    protected:
 
     std::shared_ptr<actions::StartMove> m_startmove;
     std::vector<std::shared_ptr<actions::Action>> m_actions;
+    std::pair<int, int> m_selectedActions{-1,-1};
     std::vector<std::shared_ptr<modifiers::Modifier>> m_modifiers;
 };
 
