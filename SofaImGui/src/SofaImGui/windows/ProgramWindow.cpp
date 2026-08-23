@@ -446,7 +446,7 @@ bool ProgramWindow::showTrackButtons(const int &trackIndex, const char* const me
     static bool collapsed = false;
     ImGuiWindow* window = ImGui::GetCurrentWindow();
     ImDrawList* drawList = ImGui::GetWindowDrawList();
-    ImVec2 size(ImGui::GetFrameHeight(), ProgramSizes().TrackHeight);
+    ImVec2 size(ImGui::GetFrameHeight() * 2, ProgramSizes().TrackHeight);
 
     float x = window->DC.CursorPos.x ;
     float y = window->DC.CursorPos.y ;
@@ -484,17 +484,20 @@ bool ProgramWindow::showTrackButtons(const int &trackIndex, const char* const me
 
     window->DC.CursorPos.x = x;
     window->DC.CursorPos.y = y + (collapsed? (ProgramSizes().TrackHeight - ImGui::GetFrameHeight()) / 2.f :
-                                      ProgramSizes().TrackHeight - ImGui::GetFrameHeight()) ;
+                                      ProgramSizes().TrackHeight - ImGui::GetFrameHeightWithSpacing()) ;
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5, 1)); // Align icon down middle
 
     std::string collapselabel = "##TrackCollapse" + std::to_string(trackIndex);
     std::vector<std::string> icons{ICON_FA_COMPRESS, ICON_FA_EXPAND};
     static std::string icon = icons[collapsed];
     ImGui::Button((icon + collapselabel).c_str(), ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight()));
+    ImGui::SetItemTooltip(collapsed? "Expend track": "Collapse track");
+
     if (ImGui::IsItemClicked())
-    {
         collapsed = !collapsed;
-    }
+
+    ImGui::SameLine(0, 0);
+    showTrackName(trackIndex);
 
     // Animate collapse
     ImGuiContext& g = *GImGui;
@@ -508,7 +511,6 @@ bool ProgramWindow::showTrackButtons(const int &trackIndex, const char* const me
             icon = icons[collapsed];
     }
 
-    ImGui::SetItemTooltip(collapsed? "Expend track": "Collapse track");
     ImGui::PopStyleVar(); // End align icon down middle
     ImGui::PopStyleColor(3); // Color of track button
 
@@ -735,6 +737,16 @@ void ProgramWindow::showBlockOptionButton(const std::string &menulabel,
     ImGui::PopStyleColor(3);
 
     window->DC.CursorPosPrevLine = backuppos;
+}
+
+void ProgramWindow::showTrackName(const int& trackIndex)
+{
+    ImGui::BeginDisabled();
+    ImGui::PushStyleColor(ImGuiCol_ButtonText, COLOR_BLACK);
+    ImGui::PushStyleColor(ImGuiCol_Button, COLOR_WHITE);
+    ImGui::Button(("T"+std::to_string(trackIndex + 1)).c_str());
+    ImGui::PopStyleColor(2);
+    ImGui::EndDisabled();
 }
 
 void ProgramWindow::initFilePath(const std::string& filename)

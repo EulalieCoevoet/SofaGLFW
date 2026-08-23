@@ -104,6 +104,8 @@ class SOFAIMGUI_API ProgramWindow : public BaseWindow
     void showBetweenBlocksButtons(const ImVec2 &position, const unsigned int &actionIndex, std::shared_ptr<models::Track> track, const int& trackIndex); /// Add action (plus & swap) buttons
     void showBlockOptionButton(const std::string &menulabel, const std::string &label); /// Menu (add before, add after, delete, etc.).
 
+    void showTrackName(const int& trackIndex);
+
     void stepProgram(const double &dt=0., const bool &reverse=false);
     void initFilePath(const std::string& filename);
 
