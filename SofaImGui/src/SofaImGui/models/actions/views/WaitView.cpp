@@ -46,7 +46,7 @@ bool Wait::WaitView::showBlock(const std::string &label,
     ImRect bb(ImVec2(x, y), ImVec2(x + size.x, y + size.y));
     ImVec2 topRight = ImVec2(x + size.x, y);
 
-    ImGui::ActionBlock(label.c_str(), bb, ProgramColors().WaitBlockBg, selected);
+    sofaimgui::widgets::ActionBlock(label.c_str(), bb, ProgramColors().WaitBlockBg, selected);
 
     auto rectMin = ImGui::GetItemRectMin();
     auto rectMax = ImGui::GetItemRectMax();
