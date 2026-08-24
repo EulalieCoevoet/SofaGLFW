@@ -46,7 +46,7 @@ bool Custom::CustomView::showBlock(const std::string &label, const ImVec2 &size)
     ImRect bb(ImVec2(x, y), ImVec2(x + size.x, y + size.y));
     ImVec2 topRight = ImVec2(x + size.x, y);
 
-    ImGui::ActionBlock(label.c_str(), bb, ProgramColors().CustomBlockBg);
+    sofaimgui::widgets::ActionBlock(label.c_str(), bb, ProgramColors().CustomBlockBg);
 
     auto rectMin = ImGui::GetItemRectMin();
     auto rectMax = ImGui::GetItemRectMax();

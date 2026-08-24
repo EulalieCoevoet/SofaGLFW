@@ -27,7 +27,7 @@
 
 #include <unordered_map>
 
-namespace sofaimgui
+namespace sofaimgui::widgets
 {
 
 struct SOFAIMGUI_API BaseDataWidget
@@ -56,7 +56,10 @@ struct DataWidget : BaseDataWidget
     void showWidget(sofa::core::objectmodel::BaseData& data) override
     {
         if (data.isReadOnly())
-            ImGui::BeginDisabled();
+        {
+            ImGui::PushItemFlag(ImGuiItemFlags_ReadOnly, true);
+            ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_TextDisabled));
+        }
 
         if (MyData* d = dynamic_cast<MyData*>(&data))
         {
@@ -76,7 +79,10 @@ struct DataWidget : BaseDataWidget
         }
 
         if (data.isReadOnly())
-            ImGui::EndDisabled();
+        {
+            ImGui::PopStyleColor();
+            ImGui::PopItemFlag();
+        }
     }
 
     void showWidget(MyData& data)
@@ -138,7 +144,7 @@ inline bool showSliderDouble(const std::string& label, double* v, const double& 
 
     const double step = max - min;
 
-    if (ImGui::LocalInputDouble(("##SettingInput" + label).c_str(), v, powf(10.0f, floorf(log10f(step * 0.01))), step * 0.1))
+    if (sofaimgui::widgets::InputDouble(("##SettingInput" + label).c_str(), v, powf(10.0f, floorf(log10f(step * 0.01))), step * 0.1))
         hasValueChanged=true;
 
     return hasValueChanged;
@@ -149,6 +155,9 @@ inline void showWidget(sofa::core::objectmodel::BaseData& data,
                        const sofa::core::objectmodel::BaseData* max=nullptr)
 {
     auto* widget = DataWidgetFactory::GetWidget(data);
+    std::string tooltip = data.isReadOnly()? "(read only) ": "";
+    tooltip += "data type: ";
+    tooltip += data.getData()->getValueTypeString();
 
     ImGui::PushItemWidth(-1); // Fit container width
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1);
@@ -157,7 +166,7 @@ inline void showWidget(sofa::core::objectmodel::BaseData& data,
         if (min == nullptr || max == nullptr)
         {
             widget->showWidget(data);
-            ImGui::SetItemTooltip("data type: %s", data.getData()->getValueTypeString().c_str());
+            ImGui::SetItemTooltip("%s", tooltip.c_str());
         }
         else
         {
@@ -174,7 +183,7 @@ inline void showWidget(sofa::core::objectmodel::BaseData& data,
     else
     {
         BaseDataWidget::showWidgetAsText(data);
-        ImGui::SetItemTooltip("data type: %s", data.getData()->getValueTypeString().c_str());
+        ImGui::SetItemTooltip("%s", tooltip.c_str());
     }
     ImGui::PopStyleVar();
     ImGui::PopItemWidth();
