@@ -81,7 +81,7 @@ void ProgramWindow::onEndInit()
         if (m_program.isValid())
         {
             if (!m_programFilename.empty())
-                m_program.importProgram(m_programFilename);
+                importProgram(sofa::helper::system::FileSystem::append(m_programDirPath, m_programFilename));
         }
     }
 }
@@ -805,7 +805,7 @@ bool ProgramWindow::importProgram(const std::string &filename)
     bool successfulImport = false;
     if (sofa::helper::system::FileSystem::exists(filename))
     {
-        successfulImport = m_program.importProgram(filename);
+        successfulImport = m_program.importProgram(filename, m_baseGUI->getRootNode());
         if (successfulImport)
             saveProgramDirAndFilename(filename);
     }

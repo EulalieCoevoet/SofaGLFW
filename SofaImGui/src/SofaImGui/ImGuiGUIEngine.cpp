@@ -613,6 +613,8 @@ void ImGuiGUIEngine::showViewportWindow(sofaglfw::SofaGLFWBaseGUI* baseGUI)
             if (m_viewportWindow.addDrivingTabCombo(&dWindow, listTabs, IM_ARRAYSIZE(listTabs)))
                 drivingWindow = DrivingWindow(dWindow);
         }
+        else if (workbench == Workbench::SIMULATION_MODE)
+            drivingWindow = DrivingWindow::PROGRAM;
     }
 }
 

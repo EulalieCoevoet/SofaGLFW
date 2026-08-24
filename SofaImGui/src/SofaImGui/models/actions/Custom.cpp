@@ -20,6 +20,7 @@
  * Contact information: contact@sofa-framework.org                             *
  ******************************************************************************/
 
+#include "IconsFontAwesome6.h"
 #include <SofaImGui/models/actions/Custom.h>
 
 namespace sofaimgui::models::actions {
@@ -60,6 +61,26 @@ bool Custom::apply(RigidCoord &position, const double &time)
         double value = alpha * m_startValue + (1 - alpha) * m_endValue;
         d->getValueTypeInfo()->setScalarValue(d->beginEditVoidPtr(), 0, value);
         d->endEditVoidPtr();
+    }
+
+    return false;
+}
+
+bool Custom::setData(const std::string& dataPath, sofa::simulation::Node::SPtr groot)
+{
+    if (groot && !dataPath.empty())
+    {
+        sofa::core::BaseData* data;
+        if (groot->findDataLinkDest(data, "@" + dataPath, nullptr))
+        {
+            m_data = std::make_shared<guidata::GUIData>(std::make_shared<guidata::OwnedBaseData>(data, false),
+                                                        std::make_shared<guidata::OwnedBaseData>(nullptr, false),
+                                                        std::make_shared<guidata::OwnedBaseData>(nullptr, false),
+                                                        data->getName(),
+                                                        guidata::GUIData::DEFAULTGROUP,
+                                                        "");
+            return true;
+        }
     }
 
     return false;

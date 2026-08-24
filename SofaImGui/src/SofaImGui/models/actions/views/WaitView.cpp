@@ -67,9 +67,13 @@ bool Wait::WaitView::showBlock(const std::string &label,
 
         std::string id = "##comment" + std::to_string(window->DC.CursorPos.x);
         ImGui::PushStyleColor(ImGuiCol_FrameBg, COLOR_TRANSPARENT);
-        std::string text = " " ICON_FA_CIRCLE_PAUSE"  ";
-        text += wait.getComment();
-        if(ImGui::InputText(id.c_str(), text.data(), models::actions::Action::COMMENTSIZE))
+
+        ImGui::Text("  " ICON_FA_CIRCLE_PAUSE);
+        ImGui::SameLine();
+        ImGui::AlignTextToFramePadding();
+        window->DC.CursorPos.y = y;
+
+        if (ImGui::InputText(id.c_str(), wait.getComment(), models::actions::Action::COMMENTSIZE))
         {
             hasValuesChanged = true;
         }

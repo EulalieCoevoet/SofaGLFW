@@ -52,7 +52,7 @@ bool StartMove::StartMoveView::showBlock(const std::string &label,
     rectMax.x -= padding.x;
     ImGui::PushClipRect(rectMin, rectMax, true);
 
-    { // Move
+    { // Start Move
         x += padding.y;
         y += padding.y;
 
@@ -66,9 +66,13 @@ bool StartMove::StartMoveView::showBlock(const std::string &label,
 
         std::string id = "##comment" + std::to_string(window->DC.CursorPos.x);
         ImGui::PushStyleColor(ImGuiCol_FrameBg, COLOR_TRANSPARENT);
-        std::string text = " " ICON_FA_FLAG"  ";
-        text += start.getComment();
-        if (ImGui::InputText(id.c_str(), text.data(), models::actions::Action::COMMENTSIZE))
+
+        ImGui::Text("  " ICON_FA_FLAG);
+        ImGui::SameLine();
+        ImGui::AlignTextToFramePadding();
+        window->DC.CursorPos.y = y;
+
+        if (ImGui::InputText(id.c_str(), start.getComment(), models::actions::Action::COMMENTSIZE))
         {
             hasValuesChanged = true;
         }

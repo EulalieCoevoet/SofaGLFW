@@ -68,9 +68,13 @@ bool Custom::CustomView::showBlock(const std::string &label, const ImVec2 &size)
 
         std::string id = "##comment" + std::to_string(window->DC.CursorPos.x);
         ImGui::PushStyleColor(ImGuiCol_FrameBg, COLOR_TRANSPARENT);
-        std::string text = " " ICON_FA_SLIDERS"  ";
-        text += custom.getComment();
-        if(ImGui::InputText(id.c_str(), text.data(), models::actions::Action::COMMENTSIZE))
+
+        ImGui::Text("  " ICON_FA_SLIDERS);
+        ImGui::SameLine();
+        ImGui::AlignTextToFramePadding();
+        window->DC.CursorPos.y = y;
+
+        if(ImGui::InputText(id.c_str(), custom.getComment(), models::actions::Action::COMMENTSIZE))
         {
             hasValuesChanged = true;
         }

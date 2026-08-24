@@ -42,6 +42,15 @@ public:
     void computeDuration() override;
     void computeSpeed() override;
 
+    guidata::GUIData::SPtr getData() {return m_data;}
+    bool setData(const std::string& dataPath, sofa::simulation::Node::SPtr groot);
+
+    double getStartValue() {return m_startValue;}
+    void setStartValue(const double& startValue) {m_startValue=startValue;}
+
+    double getEndValue() {return m_endValue;}
+    void setEndValue(const double& endValue) {m_endValue=endValue;}
+
 protected:
 
     guidata::GUIData::SPtr m_data{nullptr};
