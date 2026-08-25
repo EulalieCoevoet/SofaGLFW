@@ -104,7 +104,7 @@ void ProgramWindow::internalShowWindow()
 {
     if (isEnabledByState())
     {
-        ProgramSizes().TrackMaxHeight = ImGui::GetFrameHeightWithSpacing() * 4.55;
+        ProgramSizes().TrackMaxHeight = ImGui::GetFrameHeightWithSpacing() * 4.;
         ProgramSizes().TrackMinHeight = ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.y * 2.;
         static bool firstTime = true;
         if (firstTime)
@@ -521,7 +521,6 @@ bool ProgramWindow::showTrackButtons(const int &trackIndex, const char* const me
 void ProgramWindow::showBlocks(std::shared_ptr<models::Track> track,
                                const int& trackIndex)
 {
-    ImGui::PushStyleColor(ImGuiCol_PopupBg, ImGui::GetColorU32(COLOR_WHITE));
     float blockHeight = ProgramSizes().TrackHeight;
 
     if (m_kinematicsGUIDataManager->hasTCP())
@@ -539,7 +538,6 @@ void ProgramWindow::showBlocks(std::shared_ptr<models::Track> track,
     ImGui::GetCurrentWindow()->DC.CursorPosPrevLine.y = y;
 
     showActionBlocks(blockHeight, trackIndex, track);
-    ImGui::PopStyleColor();
 }
 
 void ProgramWindow::showStartMoveBlock(const float& blockHeight,

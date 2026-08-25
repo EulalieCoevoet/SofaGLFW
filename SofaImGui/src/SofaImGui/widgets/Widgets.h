@@ -42,18 +42,4 @@ void EndCollapsingHeader();
 /// Format: ICON_FA_GLOBE Open label
 void TextLinkOpenURL(const char* label, const char* url);
 
-// ProgramWindow widgets
-
-/// Draws a colored block with a title area.
-void Block(const char* label, const ImRect &bb, const ImVec4 &color, const float &offset);
-
-/// Draws an action block.
-void ActionBlock(const char* label, const ImRect &bb, const ImVec4 &color);
-
-/// Draws a modifier block with draggable left and right handles.
-void ModifierBlock(const char* label, const ImRect &bb, double *dragleft, double *dragright, const ImVec4 &color);
-
-/// Draws a draggable area within the specified bounding box.
-void Drag(const char* label, const ImRect &bb, double *value);
-
 }
