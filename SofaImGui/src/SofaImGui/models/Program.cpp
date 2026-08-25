@@ -354,21 +354,29 @@ void Program::exportProgram(const std::string &filename)
                 }
 
                 std::shared_ptr<actions::Custom> custom = std::dynamic_pointer_cast<actions::Custom>(action);
-                if (custom && custom->getData()) // CUSTOM
+                if (custom) // CUSTOM
                 {
-                    tinyxml2::XMLElement * xmlCustom = document.NewElement("action");
-                    if (xmlCustom != nullptr)
+                    if (custom->getData())
                     {
-                        xmlCustom->SetAttribute("name", "custom");
-                        xmlCustom->SetAttribute("duration", custom->getDuration());
-                        xmlCustom->SetAttribute("comment", custom->getComment());
-                        xmlCustom->SetAttribute("data", custom->getData()->getData()->getPathName().c_str());
-                        xmlCustom->SetAttribute("start", custom->getStartValue());
-                        xmlCustom->SetAttribute("end", custom->getEndValue());
-                        xmlCustom->InsertEndChild(xmlCustom);
-                        xmlTrack->InsertEndChild(xmlCustom);
+                        tinyxml2::XMLElement * xmlCustom = document.NewElement("action");
+                        if (xmlCustom != nullptr)
+                        {
+                            xmlCustom->SetAttribute("name", "custom");
+                            xmlCustom->SetAttribute("duration", custom->getDuration());
+                            xmlCustom->SetAttribute("comment", custom->getComment());
+                            xmlCustom->SetAttribute("data", custom->getData()->getData()->getPathName().c_str());
+                            xmlCustom->SetAttribute("start", custom->getStartValue());
+                            xmlCustom->SetAttribute("end", custom->getEndValue());
+                            xmlCustom->InsertEndChild(xmlCustom);
+                            xmlTrack->InsertEndChild(xmlCustom);
+                        }
+                        continue;
                     }
-                    continue;
+                    else
+                    {
+                        std::string comment = custom->getComment();
+                        FooterStatusBar::getInstance().setTempMessage("Cannot export " + comment + " block because no data was provided", FooterStatusBar::MessageType::MWARNING);
+                    }
                 }
             }
             const auto modifiers = track->getModifiers();

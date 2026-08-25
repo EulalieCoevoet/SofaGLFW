@@ -22,6 +22,7 @@
 
 #include "IconsFontAwesome6.h"
 #include <SofaImGui/models/actions/Custom.h>
+#include <SofaImGui/FooterStatusBar.h>
 
 namespace sofaimgui::models::actions {
 
@@ -80,6 +81,10 @@ bool Custom::setData(const std::string& dataPath, sofa::simulation::Node::SPtr g
                                                         guidata::GUIData::DEFAULTGROUP,
                                                         "");
             return true;
+        }
+        else
+        {
+            FooterStatusBar::getInstance().setTempMessage("Data path " + dataPath + " does not exist.", FooterStatusBar::MessageType::MWARNING);
         }
     }
 
