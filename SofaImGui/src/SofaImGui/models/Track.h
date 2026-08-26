@@ -65,11 +65,14 @@ class Track
     void setActionSelected(sofa::Index index);
     void clearActionSelected() {m_selectedActions.first=-1; m_selectedActions.second=-1;}
 
+    void group();
+    void ungroup(actions::Action::SPtr action);
+
    protected:
 
     std::shared_ptr<actions::StartMove> m_startmove;
-    std::vector<std::shared_ptr<actions::Action>> m_actions;
-    std::vector<std::pair<int, int>> m_groups;
+    std::vector<actions::Action::SPtr> m_actions;
+    std::map<actions::Action::SPtr, std::pair<int, int>> m_groups;
 
     std::pair<int, int> m_selectedActions{-1,-1};
 };

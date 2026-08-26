@@ -118,6 +118,17 @@ void Track::setActionSelected(sofa::Index index)
     }
 }
 
+void Track::group()
+{
+    if (m_selectedActions.first != -1 && m_selectedActions.second != -1)
+        m_groups[m_actions[m_selectedActions.first]] = m_selectedActions;
+}
+
+void Track::ungroup(actions::Action::SPtr action)
+{
+    m_groups.erase(action);
+}
+
 } // namespace
 
 
