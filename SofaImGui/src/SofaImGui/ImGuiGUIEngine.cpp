@@ -137,7 +137,7 @@ void ImGuiGUIEngine::saveProject(const bool& saveAs)
     auto& windowSettings = windows::WindowsSettings::getInstance();
 
     // Save windows settings in project file
-    saveActiveWorkbenchDocksSize();
+    storeActiveWorkbenchDocksSize();
     for (const auto& window : m_windows)
     {
         auto& w = window.get();
@@ -550,7 +550,7 @@ void ImGuiGUIEngine::initDockSpace(const bool& firstTime)
     ImGui::End();
 }
 
-void ImGuiGUIEngine::saveActiveWorkbenchDocksSize()
+void ImGuiGUIEngine::storeActiveWorkbenchDocksSize()
 {
     auto& windowSettings = windows::WindowsSettings::getInstance();
     if (auto g = ImGui::GetCurrentContext())
@@ -570,7 +570,7 @@ void ImGuiGUIEngine::saveActiveWorkbenchDocksSize()
 void ImGuiGUIEngine::changeWorkbench(Workbench wb)
 {
     // Save active workbench docks size before changing
-    saveActiveWorkbenchDocksSize();
+    storeActiveWorkbenchDocksSize();
 
     // Change active workbench
     {

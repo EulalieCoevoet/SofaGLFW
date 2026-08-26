@@ -154,7 +154,7 @@ protected:
     void enableWindows();
     void createGUINode(Node::SPtr guiNode = nullptr);
     void clearGUI();
-    void saveActiveWorkbenchDocksSize();
+    void storeActiveWorkbenchDocksSize();
     void applyDockSizeFromWindowsSettings(const ImGuiID& id);
     void setWindowsBaseGUI(sofaglfw::SofaGLFWBaseGUI*);
     void notifyWindowsEndInit();
