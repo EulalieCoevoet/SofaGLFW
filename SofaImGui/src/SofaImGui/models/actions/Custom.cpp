@@ -59,7 +59,7 @@ bool Custom::apply(RigidCoord &position, const double &time)
     {
         auto d = m_data->getData();
         double alpha = time / m_duration;
-        double value = alpha * m_startValue + (1 - alpha) * m_endValue;
+        double value = (1-alpha) * m_startValue + alpha * m_endValue;
         d->getValueTypeInfo()->setScalarValue(d->beginEditVoidPtr(), 0, value);
         d->endEditVoidPtr();
     }
