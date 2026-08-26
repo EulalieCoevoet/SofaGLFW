@@ -589,7 +589,7 @@ void ViewportWindow::addDrivingTabCombo()
                         m_ws_drivingWindow = dw;
                     ImGui::PopStyleColor(3);
                     ImGui::PopItemWidth();
-                    ImGui::SetItemTooltip("Choose a window to drive the TCP target");
+                    ImGui::SetItemTooltip("Choose a window to drive simulation data");
                 }
                 ImGui::EndChild();
             }
