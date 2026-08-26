@@ -137,6 +137,7 @@ void ImGuiGUIEngine::saveProject(const bool& saveAs)
     auto& windowSettings = windows::WindowsSettings::getInstance();
 
     // Save windows settings in project file
+    saveActiveWorkbenchDocksSize();
     for (const auto& window : m_windows)
     {
         auto& w = window.get();
@@ -549,25 +550,27 @@ void ImGuiGUIEngine::initDockSpace(const bool& firstTime)
     ImGui::End();
 }
 
-void ImGuiGUIEngine::changeWorkbench(Workbench wb)
+void ImGuiGUIEngine::saveActiveWorkbenchDocksSize()
 {
-    // Save active workbench docks size before changing
+    auto& windowSettings = windows::WindowsSettings::getInstance();
+    if (auto g = ImGui::GetCurrentContext())
     {
-        auto& windowSettings = windows::WindowsSettings::getInstance();
-        if (auto g = ImGui::GetCurrentContext())
+        for (const auto& dockID : m_dockIDs)
         {
-            // Save docks settings in project file
-            for (const auto& dockID : m_dockIDs)
+            if (auto dock = ImGui::DockContextFindNodeByID(g, dockID))
             {
-                if (auto dock = ImGui::DockContextFindNodeByID(g, dockID))
-                {
-                    std::string settingName = std::to_string(dockID) + getWorkbenchName(workbench);
-                    windowSettings.setSetting(settingName.c_str(), "width", double(dock->Size[0]));
-                    windowSettings.setSetting(settingName.c_str(), "height", double(dock->Size[1]));
-                }
+                std::string settingName = std::to_string(dockID) + getWorkbenchName(workbench);
+                windowSettings.setSetting(settingName.c_str(), "width", double(dock->Size[0]));
+                windowSettings.setSetting(settingName.c_str(), "height", double(dock->Size[1]));
             }
         }
     }
+}
+
+void ImGuiGUIEngine::changeWorkbench(Workbench wb)
+{
+    // Save active workbench docks size before changing
+    saveActiveWorkbenchDocksSize();
 
     // Change active workbench
     {
