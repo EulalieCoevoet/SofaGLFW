@@ -65,10 +65,16 @@ class SOFAIMGUI_API Program
 
     std::string getExtension() {return ".crprog";}
 
+    bool isTrackSelected(sofa::Index index) {return ((int)index == m_selectedTrack);}
+    void setTrackSelected(sofa::Index index) {m_selectedTrack = index;}
+    void clearTrackSelected();
+
    protected:
 
     guidata::KinematicsGUIDataManager::SPtr m_kinematicsGUIDataManager;
     std::vector<Track::SPtr> m_tracks;
+
+    int m_selectedTrack{-1};
 
     bool checkExtension(const std::string &filename);
     bool checkDocument(const std::string &filename, tinyxml2::XMLNode *root);

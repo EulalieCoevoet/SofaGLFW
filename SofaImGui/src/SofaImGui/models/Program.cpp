@@ -358,7 +358,12 @@ bool Program::isValid()
     return !m_tracks.empty() && m_tracks[0] && m_tracks[0]->getStartMove();
 }
 
-
+void Program::clearTrackSelected()
+{
+    if (m_selectedTrack >= 0 && m_selectedTrack < (int)m_tracks.size())
+        m_tracks[m_selectedTrack]->clearActionSelected();
+    m_selectedTrack = -1;
+}
 } // namespace
 
 

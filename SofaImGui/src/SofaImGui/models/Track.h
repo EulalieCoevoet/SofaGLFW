@@ -61,9 +61,9 @@ class Track
 
     void swapActions(const sofa::Index& actionIndex1, const sofa::Index& actionIndex2);
 
-    bool isSelected(sofa::Index index);
-    void setSelected(sofa::Index index);
-    void clearSelected() {m_selectedActions.first=-1; m_selectedActions.second=-1;}
+    bool isActionSelected(sofa::Index index);
+    void setActionSelected(sofa::Index index);
+    void clearActionSelected() {m_selectedActions.first=-1; m_selectedActions.second=-1;}
 
    protected:
 

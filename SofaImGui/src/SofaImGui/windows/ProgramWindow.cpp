@@ -586,12 +586,12 @@ void ProgramWindow::showActionBlocks(const float& blockHeight,
     const auto &actions = track->getActions();
     sofa::Index actionIndex = 0;
     if (!ImGui::IsWindowFocused())
-        track->clearSelected();
+        track->clearActionSelected();
 
     while(actionIndex < actions.size())
     {
         models::actions::Action::SPtr action = actions[actionIndex];
-        bool isSelected = track->isSelected(actionIndex);
+        bool isSelected = track->isActionSelected(actionIndex);
 
         float blockWidth = (m_ws_timeBasedDisplay? action->getDuration(): 1.f) * ProgramSizes().TimelineOneSecondSize - ImGui::GetStyle().ItemSpacing.x;
         std::string blockLabel = "##Action" + std::to_string(trackIndex) + std::to_string(actionIndex);
@@ -618,7 +618,14 @@ void ProgramWindow::showActionBlocks(const float& blockHeight,
         }
 
         if (isSelected)
-            track->setSelected(actionIndex);
+        {
+            if (!m_program.isTrackSelected(trackIndex))
+            {
+                m_program.clearTrackSelected();
+                m_program.setTrackSelected(trackIndex);
+            }
+            track->setActionSelected(actionIndex);
+        }
 
         actionIndex = addActionBlockMenu(menuLabel, actionIndex, trackIndex, track, action);
         if (blockWidth > ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x * 2.0f)
