@@ -69,6 +69,7 @@ class Track
 
     std::shared_ptr<actions::StartMove> m_startmove;
     std::vector<std::shared_ptr<actions::Action>> m_actions;
+    std::vector<std::pair<int, int>> m_groups;
 
     std::pair<int, int> m_selectedActions{-1,-1};
 };

@@ -37,6 +37,8 @@ class StartMove : public Action
 
    public:
 
+    typedef std::shared_ptr<StartMove> SPtr;
+
     StartMove(const RigidCoord& initialPoint,
               const RigidCoord& waypoint,
               const double& duration,

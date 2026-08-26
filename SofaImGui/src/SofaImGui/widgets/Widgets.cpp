@@ -237,12 +237,11 @@ void TextLinkOpenURL(const char* label, const char* url)
     ImGui::TextLinkOpenURL(_label.c_str(), url);
 }
 
-void Block(const char* label, const ImRect &bb, const ImVec4 &color, const float &offset, bool* selected)
+void Block(const char* label, const ImRect &bb, const ImVec4 &color, bool* selected)
 {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
 
     ImRect blockbb = bb;
-    blockbb.Min.y -= offset;
     const ImGuiID id = ImGui::GetID(label);
     if (!ImGui::ItemAdd(blockbb, id))
         return;
@@ -253,7 +252,7 @@ void Block(const char* label, const ImRect &bb, const ImVec4 &color, const float
         bool show = ImGui::IsItemClicked(ImGuiMouseButton_Left) || *selected;
         *selected = ImGui::IsItemClicked(ImGuiMouseButton_Left);
         if (show)
-            drawList->AddRect(ImVec2(bb.Min.x, bb.Min.y - offset),
+            drawList->AddRect(ImVec2(bb.Min.x, bb.Min.y),
                               ImVec2(bb.Max.x, bb.Max.y),
                               COLOR_LIGHT_BLUE,
                               ImGui::GetStyle().FrameRounding,
@@ -261,7 +260,7 @@ void Block(const char* label, const ImRect &bb, const ImVec4 &color, const float
     }
 
     { // Block background
-        drawList->AddRectFilled(ImVec2(bb.Min.x, bb.Min.y - offset),
+        drawList->AddRectFilled(ImVec2(bb.Min.x, bb.Min.y),
                                 ImVec2(bb.Max.x, bb.Max.y),
                                 ImGui::GetColorU32(color),
                                 ImGui::GetStyle().FrameRounding,
@@ -283,64 +282,7 @@ void Block(const char* label, const ImRect &bb, const ImVec4 &color, const float
 
 void ActionBlock(const char* label, const ImRect &bb, const ImVec4 &color, bool *selected)
 {
-    Block(label, bb, color, 0., selected);
-}
-
-void ModifierBlock(const char* label, const ImRect &bb, double *dragleft, double *dragright, const ImVec4 &color)
-{
-    float x = bb.Min.x ;
-    float y = bb.Min.y ;
-
-    ImVec2 size = bb.GetSize();
-    ImVec2 dragSize(2.f, size.y);
-    ImRect bbLeft(ImVec2(x, y), ImVec2(x + dragSize.x, y + size.y));
-    ImRect bbRight(ImVec2(x + size.x - dragSize.x, y), ImVec2(x + size.x, y + size.y));
-
-    std::string labelLeft = label;
-    labelLeft += "dragLeft";
-    Drag(labelLeft.c_str(), bbLeft, dragleft);
-
-    std::string labelRight = label;
-    labelRight += "dragRight";
-    Drag(labelRight.c_str(), bbRight, dragright);
-
-    Block(label, bb, color, size.y + ImGui::GetStyle().FramePadding.y);
-}
-
-void Drag(const char* label, const ImRect &bb, double *value)
-{
-    ImGuiWindow* window = ImGui::GetCurrentWindow();
-
-    const ImGuiID id = ImGui::GetID(label);
-    if (!ImGui::ItemAdd(bb, id))
-        return;
-
-    ImGuiContext& g = *GImGui;
-    const bool hovered = ImGui::ItemHoverable(bb, id, g.LastItemData.ItemFlags);
-    const bool clicked = hovered && ImGui::IsMouseClicked(ImGuiMouseButton_Left, ImGuiInputFlags_None, id);
-    const bool makeActive = (clicked || g.NavActivateId == id);
-
-    if (hovered || ImGui::IsMouseDown(0, id))
-        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-
-    if (clicked)
-        ImGui::SetKeyOwner(ImGuiKey_MouseLeft, id);
-
-    if (makeActive)
-    {
-        ImGui::SetActiveID(id, window);
-        ImGui::SetFocusID(id, window);
-        ImGui::FocusWindow(window);
-        g.ActiveIdUsingNavDirMask |= (1 << ImGuiDir_Left) | (1 << ImGuiDir_Right);
-    }
-
-    double min = -500;
-    double max = 500;
-    const bool valueChanged = ImGui::DragBehavior(id, ImGuiDataType_Double,
-                                                   value, 1., &min, &max, "%0.2f",
-                                                   ImGuiSliderFlags_NoInput);
-    if (valueChanged)
-        ImGui::MarkItemEdited(id);
+    Block(label, bb, color, selected);
 }
 
 }

@@ -38,6 +38,8 @@ class Action: public std::enable_shared_from_this< Action >
 
    public:
 
+    typedef std::shared_ptr<Action> SPtr;
+
     inline static const int COMMENTSIZE = 18;
     inline static const double DEFAULTDURATION = 1.;
 

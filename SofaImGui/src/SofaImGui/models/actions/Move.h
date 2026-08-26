@@ -38,6 +38,8 @@ class Move : public StartMove
 
    public:
 
+    typedef std::shared_ptr<Move> SPtr;
+
     enum Type {
         LINE
     };
