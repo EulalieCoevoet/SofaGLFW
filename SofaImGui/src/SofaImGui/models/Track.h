@@ -23,7 +23,6 @@
 
 #include <memory>
 
-#include <SofaImGui/models/modifiers/Modifier.h>
 #include <SofaImGui/models/actions/Action.h>
 #include <SofaImGui/models/actions/Move.h>
 #include <SofaImGui/models/actions/StartMove.h>
@@ -55,9 +54,6 @@ class Track
     std::vector<std::shared_ptr<actions::Action>>& getActions() {return m_actions;}
     std::shared_ptr<actions::Action> getAction(const sofa::Index& actionIndex) {return m_actions[actionIndex];}
 
-    std::vector<std::shared_ptr<modifiers::Modifier>>& getModifiers() {return m_modifiers;}
-    std::shared_ptr<modifiers::Modifier> getModifier(const sofa::Index& modifierIndex) {return m_modifiers[modifierIndex];}
-
     void updateNextMoveInitialPoint(const sofa::Index &actionIndex, const RigidCoord &initialPoint);
 
     std::shared_ptr<actions::Move> getPreviousMove(const sofa::Index &actionIndex);
@@ -73,8 +69,8 @@ class Track
 
     std::shared_ptr<actions::StartMove> m_startmove;
     std::vector<std::shared_ptr<actions::Action>> m_actions;
+
     std::pair<int, int> m_selectedActions{-1,-1};
-    std::vector<std::shared_ptr<modifiers::Modifier>> m_modifiers;
 };
 
 } // namespace

@@ -29,7 +29,6 @@
 #include <SofaImGui/models/actions/Move.h>
 #include <SofaImGui/models/actions/Pick.h>
 #include <SofaImGui/models/actions/Wait.h>
-#include <SofaImGui/models/modifiers/Repeat.h>
 
 #include <sofa/helper/system/FileSystem.h>
 #include <sofa/helper/Utils.h>
@@ -165,7 +164,7 @@ void ProgramWindow::internalShowWindow()
     }
     else
     {
-        showInfoMessage("This window is designed for programming a robot using action and modifier blocks arranged on time-based tracks. "
+        showInfoMessage("This window is designed for programming a robot using action blocks arranged on time-based tracks. "
                         "The scene is missing elements for this window to work properly.");
     }
 }
@@ -200,13 +199,6 @@ void ProgramWindow::showProgramButtons()
     if (ImGui::Button("Restart"))
     {
         setTime(0);
-
-        for (const auto& track: m_program.getTracks())
-        {
-            const auto& modifiers = track->getModifiers();
-            for (const auto& modifier: modifiers)
-                modifier->reset();
-        }
     }
     ImGui::SetItemTooltip("Restart the program");
 
@@ -527,14 +519,6 @@ void ProgramWindow::showBlocks(std::shared_ptr<models::Track> track,
 
     showStartMoveBlock(blockHeight, trackIndex, track);
 
-    float x = ImGui::GetCurrentWindow()->DC.CursorPosPrevLine.x ;
-    float y = ImGui::GetCurrentWindow()->DC.CursorPosPrevLine.y ;
-
-    showModifierBlocks(blockHeight, trackIndex, track);
-
-    ImGui::GetCurrentWindow()->DC.CursorPosPrevLine.x = x;
-    ImGui::GetCurrentWindow()->DC.CursorPosPrevLine.y = y;
-
     showActionBlocks(blockHeight, trackIndex, track);
 }
 
@@ -558,29 +542,6 @@ void ProgramWindow::showStartMoveBlock(const float& blockHeight,
             track->updateNextMoveInitialPoint(-1, startmove->getWaypoint());
         }
         showBlockOptionButton(menuLabel, blockLabel);
-    }
-}
-
-void ProgramWindow::showModifierBlocks(const float& blockHeight,
-                                      const sofa::Index& trackIndex,
-                                      std::shared_ptr<models::Track> track)
-{
-    const std::vector<std::shared_ptr<models::modifiers::Modifier>> &modifiers = track->getModifiers();
-    sofa::Index modifierIndex = 0;
-
-    while(modifierIndex < modifiers.size())
-    {
-        std::shared_ptr<models::modifiers::Modifier> modifier = modifiers[modifierIndex];
-        float blockWidth = modifier->getDuration() * ProgramSizes().TimelineOneSecondSize - ImGui::GetStyle().ItemSpacing.x;
-        std::string blockLabel = "##Modifier" + std::to_string(trackIndex) + std::to_string(modifierIndex);
-        std::string menuLabel = std::string("##OptionsMenu" + blockLabel);
-
-        modifierIndex = addModifierBlockMenu(menuLabel, modifierIndex, track, modifier);
-
-        ImGui::SameLine();
-        modifier->getView()->showBlock(blockLabel, ImVec2(blockWidth, blockHeight), m_trackBeginPos);
-        if (blockWidth > ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x * 2.0f)
-            showBlockOptionButton(menuLabel, blockLabel);
     }
 }
 
@@ -920,29 +881,11 @@ void ProgramWindow::animateBeginEvent(sofa::simulation::Node *groot)
         double dt = reverse? -groot->getDt(): groot->getDt();
         double programDuration = m_program.getDuration();
 
-        for (const auto& track: m_program.getTracks()) // allow the mofifiers to do their jobs first
-        {
-            const auto& modifiers = track->getModifiers();
-            for (const auto& modifier: modifiers)
-            {
-                double time = m_time;
-                modifier->modify(time);
-                setTime(time);
-            }
-        }
-
         if (groot->getTime() >= programDuration - eps) // if we've reached the end of the program
         {
             if (m_ws_repeat) // start from beginning
             {
                 setTime(0.);
-
-                for (const auto& track: m_program.getTracks())
-                {
-                    const auto& modifiers = track->getModifiers();
-                    for (const auto& modifier: modifiers)
-                        modifier->reset();
-                }
             }
             else if (m_ws_reverse)
             {
@@ -1005,27 +948,6 @@ void ProgramWindow::addStartMoveBlockMenu(const std::string& menuLabel,
         }
         ImGui::EndPopup();
     }
-}
-
-sofa::Index ProgramWindow::addModifierBlockMenu(const std::string& menuLabel,
-                                             const sofa::Index& modifierIndex,
-                                             std::shared_ptr<models::Track> track,
-                                             std::shared_ptr<models::modifiers::Modifier> modifier)
-{
-    sofa::Index index = modifierIndex;
-    if (ImGui::BeginPopup(menuLabel.c_str()))
-    {
-        if (ImGui::MenuItem("Delete"))
-        {
-            modifier->deleteFromTrack(track, index);
-        }
-        else
-            index++;
-        ImGui::EndPopup();
-    } else {
-        index++;
-    }
-    return index;
 }
 
 sofa::Index ProgramWindow::addActionBlockMenu(const std::string& menuLabel,
@@ -1183,22 +1105,6 @@ sofa::Index ProgramWindow::addTrackMenu(const std::string& menuLabel, const sofa
         if (ImGui::BeginMenu(("Add action##" + std::to_string(index)).c_str()))
         {
             addAddActionMenu(track, index, track->getActions().size());
-            ImGui::EndMenu();
-        }
-        if (ImGui::BeginMenu(("Add modifier##" + std::to_string(index)).c_str()))
-        {
-            if (track->getActions().empty() || !track->getModifiers().empty()) // TODO: handle showing multiple modifiers
-                ImGui::BeginDisabled();
-
-            if (ImGui::MenuItem(("Repeat##" + std::to_string(index)).c_str()))
-            {
-                std::shared_ptr<models::modifiers::Repeat> repeat = std::make_shared<models::modifiers::Repeat>(1, 0);
-                repeat->pushToTrack(track);
-            }
-
-            if (track->getActions().empty() || !track->getModifiers().empty())
-                ImGui::EndDisabled();
-
             ImGui::EndMenu();
         }
         ImGui::EndPopup();

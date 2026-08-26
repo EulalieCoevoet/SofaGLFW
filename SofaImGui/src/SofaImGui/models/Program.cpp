@@ -23,7 +23,6 @@
 #include <filesystem>
 #include <sofa/helper/system/Locale.h>
 #include <SofaImGui/models/Program.h>
-#include <SofaImGui/models/modifiers/Repeat.h>
 #include <SofaImGui/models/actions/Pick.h>
 #include <SofaImGui/models/actions/Wait.h>
 #include <SofaImGui/FooterStatusBar.h>
@@ -168,34 +167,6 @@ bool Program::importProgram(const std::string &filename)
                         }
                     }
 
-                    for(const auto* e = t->FirstChildElement("modifier"); e != nullptr; e = e->NextSiblingElement("modifier"))
-                    {
-                        if (strcmp(e->FirstAttribute()->Value(), "repeat") == 0)
-                        {
-                            if (!e->FindAttribute("iterations"))
-                                return false;
-                            int iterations = e->FindAttribute("iterations")->IntValue();
-
-                            if (!e->FindAttribute("endTime"))
-                                return false;
-                            double endTime = e->FindAttribute("endTime")->DoubleValue();
-
-                            if (!e->FindAttribute("startTime"))
-                                return false;
-                            double startTime = e->FindAttribute("startTime")->DoubleValue();
-
-                            if (!e->FindAttribute("type"))
-                                return false;
-                            modifiers::Repeat::Type type = static_cast<modifiers::Repeat::Type>(e->FindAttribute("type")->IntValue());
-
-                            std::shared_ptr<modifiers::Repeat> repeat = std::make_shared<modifiers::Repeat>(iterations, endTime, startTime, type);
-                            if (e->FindAttribute("comment"))
-                                repeat->setComment(e->Attribute("comment"));
-
-                            repeat->pushToTrack(track);
-                        }
-                    }
-
                     tracks.push_back(track);
                 }
 
@@ -331,27 +302,6 @@ void Program::exportProgram(const std::string &filename)
                         xmlWait->SetAttribute("comment", wait->getComment());
                         xmlWait->InsertEndChild(xmlWait);
                         xmlTrack->InsertEndChild(xmlWait);
-                    }
-                    continue;
-                }
-            }
-            const auto modifiers = track->getModifiers();
-            for (const auto& modifier: modifiers)
-            {
-                std::shared_ptr<modifiers::Repeat> repeat = std::dynamic_pointer_cast<modifiers::Repeat>(modifier);
-                if (repeat) // REPEAT
-                {
-                    tinyxml2::XMLElement * xmlRepeat = document.NewElement("modifier");
-                    if (xmlRepeat != nullptr)
-                    {
-                        xmlRepeat->SetAttribute("name", "repeat");
-                        xmlRepeat->SetAttribute("iterations", repeat->getIterations());
-                        xmlRepeat->SetAttribute("endTime", repeat->getEndTime());
-                        xmlRepeat->SetAttribute("startTime", repeat->getStartTime());
-                        xmlRepeat->SetAttribute("type", repeat->getType());
-                        xmlRepeat->SetAttribute("comment", repeat->getComment());
-                        xmlRepeat->InsertEndChild(xmlRepeat);
-                        xmlTrack->InsertEndChild(xmlRepeat);
                     }
                     continue;
                 }

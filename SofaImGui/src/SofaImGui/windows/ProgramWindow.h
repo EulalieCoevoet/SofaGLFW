@@ -87,19 +87,16 @@ class SOFAIMGUI_API ProgramWindow : public BaseWindow
     void showProgramButtons(); /// The buttons of the program window (import, export, restart, repeat, etc.).
     void showCursorMarker(const int &nbCollaspedTracks); /// The red cursor marker.
     void showTimeline(); /// The simulation timeline, in seconds.
-    int  showTracks(); /// Tracks of actions (move, wait, etc.) and modifiers (repeat section, etc.).
+    int  showTracks(); /// Tracks of actions (move, wait, etc.)
     bool showTrackButtons(const int &trackIndex, const char* const menuLabel); /// Menu (clear track, add action, etc.) and collapse option.
 
-    void showBlocks(std::shared_ptr<models::Track> track, const int &trackID); /// Action and modifier blocks.
+    void showBlocks(std::shared_ptr<models::Track> track, const int &trackID); /// Action blocks.
     void showStartMoveBlock(const float& blockHeight,
                            const sofa::Index& trackIndex,
                             std::shared_ptr<models::Track> track);
     void showActionBlocks(const float& blockHeight,
                             const sofa::Index& trackIndex,
                             std::shared_ptr<models::Track> track);
-    void showModifierBlocks(const float& blockHeight,
-                             const sofa::Index& trackIndex,
-                             std::shared_ptr<models::Track> track);
 
     void showBetweenBlocksButtons(const ImVec2 &position, const unsigned int &actionIndex, std::shared_ptr<models::Track> track, const int& trackIndex); /// Add action (plus & swap) buttons
     void showBlockOptionButton(const std::string &menulabel, const std::string &label); /// Menu (add before, add after, delete, etc.).
@@ -114,11 +111,6 @@ class SOFAIMGUI_API ProgramWindow : public BaseWindow
                                const sofa::Index& trackIndex,
                                std::shared_ptr<models::Track> track,
                                std::shared_ptr<models::actions::StartMove> startmove);
-
-    sofa::Index addModifierBlockMenu(const std::string& menuLabel,
-                                     const sofa::Index &modifierIndex,
-                                     std::shared_ptr<models::Track> track,
-                                     std::shared_ptr<models::modifiers::Modifier> modifier);
 
     sofa::Index addActionBlockMenu(const std::string& menuLabel,
                                     const sofa::Index& actionIndex,

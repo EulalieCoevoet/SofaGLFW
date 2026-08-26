@@ -20,7 +20,6 @@
  * Contact information: contact@sofa-framework.org                             *
  ******************************************************************************/
 #include <SofaImGui/models/Track.h>
-#include <SofaImGui/models/modifiers/Repeat.h>
 
 
 namespace sofaimgui::models {
@@ -51,7 +50,6 @@ Track::Track(std::shared_ptr<actions::StartMove> startMove)
 void Track::clear()
 {
     m_actions.clear();
-    m_modifiers.clear();
 }
 
 std::shared_ptr<actions::Move> Track::getPreviousMove(const sofa::Index &actionIndex)
