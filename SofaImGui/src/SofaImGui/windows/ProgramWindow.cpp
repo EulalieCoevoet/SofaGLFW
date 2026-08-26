@@ -63,7 +63,7 @@ ProgramWindow::ProgramWindow(const std::string& name,
 
 std::string ProgramWindow::getDescription()
 {
-    return "Create robot programs.";
+    return "Create programs with simulation data.";
 }
 
 void ProgramWindow::clear()
