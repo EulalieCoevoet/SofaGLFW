@@ -595,6 +595,8 @@ void ProgramWindow::showActionBlocks(const float& blockHeight,
 
     while(actionIndex < actions.size())
     {
+        ImGui::PushID(actionIndex);
+
         std::shared_ptr<models::actions::Action> action = actions[actionIndex];
         float blockWidth = (m_ws_timeBasedDisplay? action->getDuration(): 1.f) * ProgramSizes().TimelineOneSecondSize - ImGui::GetStyle().ItemSpacing.x;
         std::string blockLabel = "##Action" + std::to_string(trackIndex) + std::to_string(actionIndex);
@@ -625,6 +627,8 @@ void ProgramWindow::showActionBlocks(const float& blockHeight,
             showBlockOptionButton(menuLabel, blockLabel);
 
         showBetweenBlocksButtons(ImVec2(x, y + blockHeight / 2.f), actionIndex - 1, track, trackIndex);
+
+        ImGui::PopID();
     }
 }
 

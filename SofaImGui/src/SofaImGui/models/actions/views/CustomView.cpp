@@ -107,7 +107,8 @@ bool Custom::CustomView::showBlock(const std::string &label, const ImVec2 &size)
 
         ImGui::BeginDisabled();
         ImGui::PushItemWidth(ImGui::CalcTextSize(label.c_str()).x + ImGui::GetStyle().FramePadding.x * 2);
-        ImGui::InputText("##data", &label);
+        std::string idData = "##data" + std::to_string(window->DC.CursorPos.y);
+        ImGui::InputText(idData.c_str(), &label);
         ImGui::SetItemTooltip("%s", tooltip.c_str());
         ImGui::PopItemWidth();
         ImGui::EndDisabled();
