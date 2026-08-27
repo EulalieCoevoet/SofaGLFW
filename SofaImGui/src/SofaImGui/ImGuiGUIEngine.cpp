@@ -634,7 +634,7 @@ void ImGuiGUIEngine::showViewportWindow(sofaglfw::SofaGLFWBaseGUI* baseGUI)
             loadSimulation(true, baseGUI->getFilename());
 
         // Driving Tab combo
-        if(m_kinematicsGUIDataManager->hasInverseProblemSolverAndTCP())
+        if(workbench != Workbench::SCENE_EDITOR)
             m_viewportWindow.addDrivingTabCombo();
     }
 }

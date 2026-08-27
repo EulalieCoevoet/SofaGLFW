@@ -82,7 +82,7 @@ class SOFAIMGUI_API ProgramWindow : public BaseWindow
     void internalShowWindow() override;
     void registerAndLoadWindowSettings() override;
 
-    bool isEnabledByState() override {return m_program.isValid() && m_kinematicsGUIDataManager->hasInverseProblemSolverAndTCP();}
+    bool isEnabledByState() override {return m_program.isValid();}
 
     void showProgramButtons(); /// The buttons of the program window (import, export, restart, repeat, etc.).
     void showCursorMarker(const int &nbCollaspedTracks); /// The red cursor marker.

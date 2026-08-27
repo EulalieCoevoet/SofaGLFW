@@ -22,10 +22,11 @@
 
 #include "GUIColors.h"
 #include <SofaImGui/windows/ProgramWindow.h>
-#include <SofaImGui/models/actions/Action.h>
 #include <SofaImGui/Utils.h>
 #include <SofaImGui/widgets/Widgets.h>
 
+#include <SofaImGui/models/actions/Action.h>
+#include <SofaImGui/models/actions/Custom.h>
 #include <SofaImGui/models/actions/Move.h>
 #include <SofaImGui/models/actions/Pick.h>
 #include <SofaImGui/models/actions/Wait.h>
@@ -62,12 +63,12 @@ ProgramWindow::ProgramWindow(const std::string& name,
 
 std::string ProgramWindow::getDescription()
 {
-    return "Create robot programs.";
+    return "Create programs with simulation data.";
 }
 
 void ProgramWindow::clearWindow()
 {
-    if (isEnabledByState())
+    if (m_program.isValid())
         m_program.clearTracks();
 }
 
@@ -79,8 +80,8 @@ void ProgramWindow::onEndSimulationLoad()
 
         if (m_program.isValid())
         {
-            if (!m_ws_programFilename.empty())
-                m_program.importProgram(m_ws_programFilename);
+            if (!m_ws_programDirPath.empty() && !m_ws_programFilename.empty())
+                importProgram(sofa::helper::system::FileSystem::append(m_ws_programDirPath, m_ws_programFilename));
         }
     }
 }
@@ -103,7 +104,7 @@ void ProgramWindow::internalShowWindow()
 {
     if (isEnabledByState())
     {
-        ProgramSizes().TrackMaxHeight = ImGui::GetFrameHeightWithSpacing() * 4.55;
+        ProgramSizes().TrackMaxHeight = ImGui::GetFrameHeightWithSpacing() * 4.;
         ProgramSizes().TrackMinHeight = ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.y * 2.;
         static bool firstTime = true;
         if (firstTime)
@@ -407,7 +408,6 @@ int ProgramWindow::showTracks()
 
         ImGui::SameLine();
         m_trackBeginPos = ImGui::GetCurrentWindow()->DC.CursorPos;
-        m_trackBeginPos.x += ProgramSizes().StartMoveBlockSize;
         showBlocks(track, trackIndex);
 
         float x = ImGui::GetCurrentWindow()->DC.CursorPosPrevLine.x ;
@@ -523,7 +523,11 @@ void ProgramWindow::showBlocks(std::shared_ptr<models::Track> track,
 {
     float blockHeight = ProgramSizes().TrackHeight;
 
-    showStartMoveBlock(blockHeight, trackIndex, track);
+    if (m_kinematicsGUIDataManager->hasTCP())
+    {
+        m_trackBeginPos.x += ProgramSizes().StartMoveBlockSize;
+        showStartMoveBlock(blockHeight, trackIndex, track);
+    }
 
     float x = ImGui::GetCurrentWindow()->DC.CursorPosPrevLine.x ;
     float y = ImGui::GetCurrentWindow()->DC.CursorPosPrevLine.y ;
@@ -591,6 +595,8 @@ void ProgramWindow::showActionBlocks(const float& blockHeight,
 
     while(actionIndex < actions.size())
     {
+        ImGui::PushID(actionIndex);
+
         std::shared_ptr<models::actions::Action> action = actions[actionIndex];
         float blockWidth = (m_ws_timeBasedDisplay? action->getDuration(): 1.f) * ProgramSizes().TimelineOneSecondSize - ImGui::GetStyle().ItemSpacing.x;
         std::string blockLabel = "##Action" + std::to_string(trackIndex) + std::to_string(actionIndex);
@@ -621,6 +627,8 @@ void ProgramWindow::showActionBlocks(const float& blockHeight,
             showBlockOptionButton(menuLabel, blockLabel);
 
         showBetweenBlocksButtons(ImVec2(x, y + blockHeight / 2.f), actionIndex - 1, track, trackIndex);
+
+        ImGui::PopID();
     }
 }
 
@@ -801,7 +809,7 @@ bool ProgramWindow::importProgram(const std::string &filename)
     bool successfulImport = false;
     if (sofa::helper::system::FileSystem::exists(filename))
     {
-        successfulImport = m_program.importProgram(filename);
+        successfulImport = m_program.importProgram(filename, m_baseGUI->getRootNode());
         if (successfulImport)
             saveProgramDirAndFilename(filename);
     }
@@ -871,10 +879,11 @@ void ProgramWindow::stepProgram(const double &dt, const bool &reverse)
                 blockEnd += action->getDuration();
                 if ((!reverse && (blockEnd - m_time) > eps) || (reverse && (blockEnd - m_time - dt) > eps))
                 {
-                    RigidCoord position = m_kinematicsGUIDataManager->getTCPGUIData()->getTCPPosition();
+                    RigidCoord position = (m_kinematicsGUIDataManager->hasTCP())? m_kinematicsGUIDataManager->getTCPGUIData()->getTCPPosition() : RigidCoord();
                     if (action->apply(position, m_time + dt - blockStart)) // apply the time corresponding to the end of the time step
                     {
-                        m_kinematicsGUIDataManager->getTCPGUIData()->setTCPTargetPosition(position);
+                        if (m_kinematicsGUIDataManager->hasTCP())
+                            m_kinematicsGUIDataManager->getTCPGUIData()->setTCPTargetPosition(position);
                     }
                     break;
                 }
@@ -1104,7 +1113,7 @@ sofa::Index ProgramWindow::addActionBlockMenu(const std::string& menuLabel,
 
 bool ProgramWindow::addAddActionMenu(std::shared_ptr<models::Track> track, const int &trackIndex, const int &actionIndex)
 {
-    if (ImGui::MenuItem(("Move##" + std::to_string(trackIndex)).c_str()))
+    if (m_kinematicsGUIDataManager->hasTCP() && ImGui::MenuItem(("Move##" + std::to_string(trackIndex)).c_str()))
     {
         auto move = std::make_shared<models::actions::Move>(RigidCoord(),
                                                             m_kinematicsGUIDataManager->getTCPGUIData()->getTCPTargetPosition(),
@@ -1135,6 +1144,13 @@ bool ProgramWindow::addAddActionMenu(std::shared_ptr<models::Track> track, const
     {
         auto wait = std::make_shared<models::actions::Wait>();
         wait->insertInTrack(track, actionIndex);
+        return true;
+    }
+
+    if (ImGui::MenuItem(("Custom##" + std::to_string(trackIndex)).c_str()))
+    {
+        auto custom = std::make_shared<models::actions::Custom>();
+        custom->insertInTrack(track, actionIndex);
         return true;
     }
 

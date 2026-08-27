@@ -129,22 +129,24 @@ set(HEADER_FILES
     ${SOFAIMGUI_SOURCE_DIR}/windows/WindowsSettings.h
     ${SOFAIMGUI_SOURCE_DIR}/windows/WindowsSettingsName.h
 
-    ${SOFAIMGUI_SOURCE_DIR}/widgets/DataWidget.h
     ${SOFAIMGUI_SOURCE_DIR}/widgets/BoundingBoxWidget.h
-    ${SOFAIMGUI_SOURCE_DIR}/widgets/Widgets.h
+    ${SOFAIMGUI_SOURCE_DIR}/widgets/DataWidget.h
     ${SOFAIMGUI_SOURCE_DIR}/widgets/Gizmos.h
-    ${SOFAIMGUI_SOURCE_DIR}/widgets/MaterialWidget.h
-    ${SOFAIMGUI_SOURCE_DIR}/widgets/LinearSpringWidget.h
-    ${SOFAIMGUI_SOURCE_DIR}/widgets/ScalarWidget.h
-    ${SOFAIMGUI_SOURCE_DIR}/widgets/MovePad.h
     ${SOFAIMGUI_SOURCE_DIR}/widgets/IntWidget.h
+    ${SOFAIMGUI_SOURCE_DIR}/widgets/LinearSpringWidget.h
+    ${SOFAIMGUI_SOURCE_DIR}/widgets/MaterialWidget.h
+    ${SOFAIMGUI_SOURCE_DIR}/widgets/MovePad.h
+    ${SOFAIMGUI_SOURCE_DIR}/widgets/ProgramWidget.h
     ${SOFAIMGUI_SOURCE_DIR}/widgets/RigidMassWidget.h
+    ${SOFAIMGUI_SOURCE_DIR}/widgets/ScalarWidget.h
     ${SOFAIMGUI_SOURCE_DIR}/widgets/VecVectorWidget.h
+    ${SOFAIMGUI_SOURCE_DIR}/widgets/Widgets.h
 
     ${SOFAIMGUI_SOURCE_DIR}/menus/FileMenu.h
     ${SOFAIMGUI_SOURCE_DIR}/menus/ViewMenu.h
 
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/Action.h
+    ${SOFAIMGUI_SOURCE_DIR}/models/actions/Custom.h
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/Move.h
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/Pick.h
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/StartMove.h
@@ -198,14 +200,16 @@ set(SOURCE_FILES
 
     ${SOFAIMGUI_SOURCE_DIR}/widgets/DataWidget.cpp
     ${SOFAIMGUI_SOURCE_DIR}/widgets/Gizmos.cpp
-    ${SOFAIMGUI_SOURCE_DIR}/widgets/Widgets.cpp
     ${SOFAIMGUI_SOURCE_DIR}/widgets/MaterialWidget.cpp
     ${SOFAIMGUI_SOURCE_DIR}/widgets/MovePad.cpp
+    ${SOFAIMGUI_SOURCE_DIR}/widgets/ProgramWidget.cpp
+    ${SOFAIMGUI_SOURCE_DIR}/widgets/Widgets.cpp
 
     ${SOFAIMGUI_SOURCE_DIR}/menus/FileMenu.cpp
     ${SOFAIMGUI_SOURCE_DIR}/menus/ViewMenu.cpp
 
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/Action.cpp
+    ${SOFAIMGUI_SOURCE_DIR}/models/actions/Custom.cpp
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/Move.cpp
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/Pick.cpp
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/StartMove.cpp
@@ -213,6 +217,7 @@ set(SOURCE_FILES
     ${SOFAIMGUI_SOURCE_DIR}/models/modifiers/Modifier.cpp
     ${SOFAIMGUI_SOURCE_DIR}/models/modifiers/Repeat.cpp
 
+    ${SOFAIMGUI_SOURCE_DIR}/models/actions/views/CustomView.cpp
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/views/MoveView.cpp
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/views/PickView.cpp
     ${SOFAIMGUI_SOURCE_DIR}/models/actions/views/StartMoveView.cpp
