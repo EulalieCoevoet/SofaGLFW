@@ -19,21 +19,59 @@
  *                                                                             *
  * Contact information: contact@sofa-framework.org                             *
  ******************************************************************************/
-#include <SofaImGui/windows/WindowsSettings.h>
+#pragma once
 
-namespace sofaimgui::windows {
+#include <SofaImGui/models/guidata/GUIData.h>
+#include <SofaImGui/models/actions/Action.h>
+#include <SofaImGui/config.h>
 
-WindowsSettings &WindowsSettings::getInstance()
+
+namespace sofaimgui::models::actions {
+
+class Custom : public Action
 {
-    static WindowsSettings windowsSettings;
-    return windowsSettings;
-}
+    typedef sofa::defaulttype::RigidCoord<3, double> RigidCoord;
 
-std::string WindowsSettings::getWindowLabel(const char* _windowName)
-{
-    std::string windowName = "Window.";
-    windowName += _windowName;
-    return windowName;
-}
+public:
 
-}
+    Custom(const double& duration = Action::DEFAULTDURATION);
+    ~Custom() = default;
+
+    std::shared_ptr<Action> duplicate() override;
+    bool apply(RigidCoord &position, const double &time) override;
+    void computeDuration() override;
+    void computeSpeed() override;
+
+    guidata::GUIData::SPtr getData() {return m_data;}
+    bool setData(const std::string& dataPath, sofa::simulation::Node::SPtr groot);
+
+    double getStartValue() {return m_startValue;}
+    void setStartValue(const double& startValue) {m_startValue=startValue;}
+
+    double getEndValue() {return m_endValue;}
+    void setEndValue(const double& endValue) {m_endValue=endValue;}
+
+protected:
+
+    guidata::GUIData::SPtr m_data{nullptr};
+    double m_startValue{0.f};
+    double m_endValue{1.f};
+
+    class CustomView : public ActionView
+    {
+    public:
+        CustomView(Custom &_custom) : custom(_custom) {}
+        bool showBlock(const std::string &label,
+                       const ImVec2 &size) override;
+
+    protected:
+        Custom &custom;
+    };
+    CustomView view;
+
+public :
+
+    ActionView* getView() override {return &view;}
+};
+
+} // namespace

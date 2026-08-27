@@ -22,10 +22,11 @@
 
 #include "GUIColors.h"
 #include <SofaImGui/windows/ProgramWindow.h>
-#include <SofaImGui/models/actions/Action.h>
 #include <SofaImGui/Utils.h>
 #include <SofaImGui/widgets/Widgets.h>
 
+#include <SofaImGui/models/actions/Action.h>
+#include <SofaImGui/models/actions/Custom.h>
 #include <SofaImGui/models/actions/Move.h>
 #include <SofaImGui/models/actions/Pick.h>
 #include <SofaImGui/models/actions/Wait.h>
@@ -61,16 +62,16 @@ ProgramWindow::ProgramWindow(const std::string& name,
 
 std::string ProgramWindow::getDescription()
 {
-    return "Create robot programs.";
+    return "Create programs with simulation data.";
 }
 
-void ProgramWindow::clear()
+void ProgramWindow::clearWindow()
 {
-    if (isEnabledByState())
+    if (m_program.isValid())
         m_program.clearTracks();
 }
 
-void ProgramWindow::onEndInit()
+void ProgramWindow::onEndSimulationLoad()
 {
     if (m_program.isEmpty())
     {
@@ -78,20 +79,20 @@ void ProgramWindow::onEndInit()
 
         if (m_program.isValid())
         {
-            if (!m_ws_programFilename.empty())
-                m_program.importProgram(m_ws_programFilename);
+            if (!m_ws_programDirPath.empty() && !m_ws_programFilename.empty())
+                importProgram(sofa::helper::system::FileSystem::append(m_ws_programDirPath, m_ws_programFilename));
         }
     }
 }
 
 void ProgramWindow::registerAndLoadWindowSettings()
 {
-    registerAndLoadSetting(WS_PROGRAM_PROGRAMDIRPATH, m_ws_programDirPath, WindowsSettings::STRING);
-    registerAndLoadSetting(WS_PROGRAM_PROGRAMFILENAME, m_ws_programFilename, WindowsSettings::STRING);
-    registerAndLoadSetting(WS_PROGRAM_REPEAT, m_ws_repeat, WindowsSettings::BOOL);
-    registerAndLoadSetting(WS_PROGRAM_REVERSE, m_ws_reverse, WindowsSettings::BOOL);
-    registerAndLoadSetting(WS_PROGRAM_DRAWTRAJECTORY, m_ws_drawTrajectory, WindowsSettings::BOOL);
-    registerAndLoadSetting(WS_PROGRAM_TIMEBASEDDISPLAY, m_ws_timeBasedDisplay, WindowsSettings::BOOL);
+    registerAndLoadWindowSetting(WS_PROGRAM_PROGRAMDIRPATH, m_ws_programDirPath, WindowsSettings::STRING);
+    registerAndLoadWindowSetting(WS_PROGRAM_PROGRAMFILENAME, m_ws_programFilename, WindowsSettings::STRING);
+    registerAndLoadWindowSetting(WS_PROGRAM_REPEAT, m_ws_repeat, WindowsSettings::BOOL);
+    registerAndLoadWindowSetting(WS_PROGRAM_REVERSE, m_ws_reverse, WindowsSettings::BOOL);
+    registerAndLoadWindowSetting(WS_PROGRAM_DRAWTRAJECTORY, m_ws_drawTrajectory, WindowsSettings::BOOL);
+    registerAndLoadWindowSetting(WS_PROGRAM_TIMEBASEDDISPLAY, m_ws_timeBasedDisplay, WindowsSettings::BOOL);
 
     // Import program file if any
     if (!m_ws_programFilename.empty() && !m_ws_programDirPath.empty())
@@ -102,7 +103,7 @@ void ProgramWindow::internalShowWindow()
 {
     if (isEnabledByState())
     {
-        ProgramSizes().TrackMaxHeight = ImGui::GetFrameHeightWithSpacing() * 4.55;
+        ProgramSizes().TrackMaxHeight = ImGui::GetFrameHeightWithSpacing() * 4.;
         ProgramSizes().TrackMinHeight = ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.y * 2.;
         static bool firstTime = true;
         if (firstTime)
@@ -590,6 +591,8 @@ void ProgramWindow::showActionBlocks(const float& blockHeight,
 
     while(actionIndex < actions.size())
     {
+        ImGui::PushID(actionIndex);
+
         models::actions::Action::SPtr action = actions[actionIndex];
         bool isSelected = track->isActionSelected(actionIndex);
 
@@ -607,17 +610,17 @@ void ProgramWindow::showActionBlocks(const float& blockHeight,
         if (move)
         {
             move->setDrawTrajectory(m_ws_drawTrajectory);
-            if(move->getView()->showBlock(blockLabel, blockSize, &isSelected))
+            if(move->getView()->showBlock(blockLabel, blockSize))
             {
                 track->updateNextMoveInitialPoint(actionIndex, move->getWaypoint());
             }
         }
         else
         {
-            action->getView()->showBlock(blockLabel, blockSize, &isSelected);
+            action->getView()->showBlock(blockLabel, blockSize);
         }
 
-        if (isSelected)
+        if (isSelected) // TODO
         {
             if (!m_program.isTrackSelected(trackIndex))
             {
@@ -632,6 +635,8 @@ void ProgramWindow::showActionBlocks(const float& blockHeight,
             showBlockOptionButton(menuLabel, blockLabel);
 
         showBetweenBlocksButtons(ImVec2(x, y + blockHeight / 2.f), actionIndex - 1, track, trackIndex);
+
+        ImGui::PopID();
     }
 }
 
@@ -823,7 +828,7 @@ bool ProgramWindow::importProgram(const std::string &filename)
     bool successfulImport = false;
     if (sofa::helper::system::FileSystem::exists(filename))
     {
-        successfulImport = m_program.importProgram(filename);
+        successfulImport = m_program.importProgram(filename, m_baseGUI->getRootNode());
         if (successfulImport)
             saveProgramDirAndFilename(filename);
     }
@@ -894,10 +899,11 @@ void ProgramWindow::stepProgram(const double &dt, const bool &reverse)
                 blockEnd += action->getDuration();
                 if ((!reverse && (blockEnd - m_time) > eps) || (reverse && (blockEnd - m_time - dt) > eps))
                 {
-                    RigidCoord position = m_kinematicsGUIDataManager->getTCPGUIData()->getTCPPosition();
+                    RigidCoord position = (m_kinematicsGUIDataManager->hasTCP())? m_kinematicsGUIDataManager->getTCPGUIData()->getTCPPosition() : RigidCoord();
                     if (action->apply(position, m_time + dt - blockStart)) // apply the time corresponding to the end of the time step
                     {
-                        m_kinematicsGUIDataManager->getTCPGUIData()->setTCPTargetPosition(position);
+                        if (m_kinematicsGUIDataManager->hasTCP())
+                            m_kinematicsGUIDataManager->getTCPGUIData()->setTCPTargetPosition(position);
                     }
                     break;
                 }
@@ -1088,7 +1094,7 @@ sofa::Index ProgramWindow::addActionBlockMenu(const std::string& menuLabel,
 
 bool ProgramWindow::addAddActionMenu(models::Track::SPtr track, const int &trackIndex, const int &actionIndex)
 {
-    if (ImGui::MenuItem(("Move##" + std::to_string(trackIndex)).c_str()))
+    if (m_kinematicsGUIDataManager->hasTCP() && ImGui::MenuItem(("Move##" + std::to_string(trackIndex)).c_str()))
     {
         auto move = std::make_shared<models::actions::Move>(RigidCoord(),
                                                             m_kinematicsGUIDataManager->getTCPGUIData()->getTCPTargetPosition(),
@@ -1119,6 +1125,13 @@ bool ProgramWindow::addAddActionMenu(models::Track::SPtr track, const int &track
     {
         auto wait = std::make_shared<models::actions::Wait>();
         wait->insertInTrack(track, actionIndex);
+        return true;
+    }
+
+    if (ImGui::MenuItem(("Custom##" + std::to_string(trackIndex)).c_str()))
+    {
+        auto custom = std::make_shared<models::actions::Custom>();
+        custom->insertInTrack(track, actionIndex);
         return true;
     }
 

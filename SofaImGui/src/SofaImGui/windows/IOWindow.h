@@ -106,7 +106,10 @@ class SOFAIMGUI_API ROSNode: public rclcpp::Node
                 size_t nbValue = typeinfo->size();
                 if (vector.size() == nbValue)
                     for (size_t i = 0; i < nbValue; i++)
-                        typeinfo->setScalarValue(data, i, vector[i]);
+                    {
+                        typeinfo->setScalarValue(data->beginEditVoidPtr(), i, vector[i]);
+                        data->endEditVoidPtr();
+                    }
             }
         }
     }
@@ -131,7 +134,7 @@ class SOFAIMGUI_API IOWindow : public BaseWindow
     typedef typename sofa::defaulttype::RigidCoord<3, double> RigidCoord;
 
     std::string getDescription() override;
-    void onEndInit() override;
+    void onEndSimulationLoad() override;
 
     void animateBeginEvent(sofa::simulation::Node *groot);
     void animateEndEvent(sofa::simulation::Node *groot);
@@ -156,7 +159,7 @@ class SOFAIMGUI_API IOWindow : public BaseWindow
 
     void internalShowWindow() override;
 
-    void clear() override { m_selectableData.clear(); }
+    void clearWindow() override { m_selectableData.clear(); }
 
     /// Sanitize the input string to match ROS requirements for topic and node name (no spaces, no special characters)
     bool sanitizeName(std::string &name);

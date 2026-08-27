@@ -49,7 +49,7 @@ class SOFAIMGUI_API Program
     }
     ~Program() = default;
 
-    bool importProgram(const std::string& filename);
+    bool importProgram(const std::string& filename, sofa::simulation::Node::SPtr groot);
     void exportProgram(const std::string &filename);
 
     const std::vector<Track::SPtr>& getTracks() {return m_tracks;}
