@@ -153,11 +153,12 @@ protected:
     void saveSettings();
     void enableWindows();
     void createGUINode(Node::SPtr guiNode = nullptr);
-    void clearGUI();
+    void clearWindows();
+    void clearWindowsGUIData();
     void storeActiveWorkbenchDocksSize();
     void applyDockSizeFromWindowsSettings(const ImGuiID& id);
     void setWindowsBaseGUI(sofaglfw::SofaGLFWBaseGUI*);
-    void notifyWindowsEndInit();
+    void notifyWindowsEndSimulationLoad();
 
     bool m_animate{false};
     bool m_darkMode{false};
