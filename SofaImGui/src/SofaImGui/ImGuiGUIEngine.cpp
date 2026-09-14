@@ -1005,6 +1005,15 @@ void ImGuiGUIEngine::key_callback(GLFWwindow* window, int key, int scancode, int
     {
         switch (key)
         {
+        case GLFW_KEY_SPACE:
+        {
+            if (action == GLFW_PRESS)
+            {
+                const bool isRunning = m_baseGUI->simulationIsRunning();
+                m_baseGUI->setSimulationIsRunning(!isRunning);
+            }
+            break;
+        }
         case GLFW_KEY_0:
         {
             sofa::component::visual::BaseCamera::SPtr camera;
