@@ -83,7 +83,8 @@ class Move : public StartMove
        public:
         MoveView(Move &_move) : move(_move) {}
         bool showBlock(const std::string &label,
-                       const ImVec2 &size) override;
+                       const ImVec2 &size,
+                       const bool & = false) override;
 
        protected:
         Move &move;

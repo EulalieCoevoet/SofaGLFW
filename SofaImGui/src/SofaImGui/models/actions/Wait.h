@@ -47,7 +47,8 @@ class Wait : public Action
        public:
         WaitView(Wait &_wait) : wait(_wait) {}
         bool showBlock(const std::string &label,
-                       const ImVec2 &size) override;
+                       const ImVec2 &size,
+                       const bool & = false) override;
 
        protected:
         Wait &wait;

@@ -99,23 +99,45 @@ void Track::swapActions(const sofa::Index& actionIndex1, const sofa::Index& acti
     }
 }
 
-bool Track::isActionSelected(sofa::Index index)
+bool Track::isActionSelected(const sofa::Index& index)
 {
-    return (m_selectedActions.first == (int)index || (m_selectedActions.first <= (int)index && (int)index <= m_selectedActions.second));
+    int i = index;
+    return (m_selectedActions.first == i || (m_selectedActions.first <= i && i <= m_selectedActions.second));
 }
 
-void Track::setActionSelected(sofa::Index index)
+void Track::setActionSelected(const sofa::Index &index)
 {
-    if (ImGui::IsKeyDown(ImGuiKey_LeftShift) &&
-        m_selectedActions.first != -1 &&
-        m_selectedActions.second == -1 &&
-        m_selectedActions.first < (int)index)
-        m_selectedActions.second = index;
+    int i = index;
+    if ((ImGui::IsKeyDown(ImGuiKey_LeftShift) && m_selectedActions.first != -1 && m_selectedActions.second == -1 && m_selectedActions.first < i)
+        || (ImGui::IsKeyDown(ImGuiKey_LeftShift) && m_selectedActions.first != -1 && m_selectedActions.second != -1 && m_selectedActions.second < i)
+        )
+    {
+        m_selectedActions.second = i;
+    }
+    else if (ImGui::IsKeyDown(ImGuiKey_LeftShift) && m_selectedActions.first != -1 && m_selectedActions.second == -1 && m_selectedActions.first > i)
+    {
+        m_selectedActions.second = m_selectedActions.first;
+        m_selectedActions.first = i;
+    }
+    else if (ImGui::IsKeyDown(ImGuiKey_LeftShift) && m_selectedActions.first != -1 && m_selectedActions.second != -1 && m_selectedActions.first > i)
+    {
+        m_selectedActions.first = i;
+    }
+    else if(m_selectedActions.first == i)
+    {
+        clearSelectedActions();
+    }
     else
     {
-        m_selectedActions.first = index;
-        m_selectedActions.second = -1;
+        clearSelectedActions();
+        m_selectedActions.first = i;
     }
+}
+
+void Track::clearSelectedActions()
+{
+    m_selectedActions.first = -1;
+    m_selectedActions.second = -1;
 }
 
 void Track::group()
@@ -124,9 +146,51 @@ void Track::group()
         m_groups[m_actions[m_selectedActions.first]] = m_selectedActions;
 }
 
-void Track::ungroup(actions::Action::SPtr action)
+void Track::ungroup(const int &actionIndex)
 {
-    m_groups.erase(action);
+    for (auto [key, group]: m_groups)
+        if (isInGroup(actionIndex, group))
+            m_groups.erase(key);
+}
+
+bool Track::canGroup(const int& actionIndex)
+{
+    return isActionSelected(actionIndex) && (m_selectedActions.first < m_selectedActions.second) && !canUngroup(actionIndex);
+}
+
+bool Track::canUngroup(const int& actionIndex)
+{
+    return isInGroup(actionIndex);
+}
+
+bool Track::isInGroup(const int& actionIndex)
+{
+    for (auto [key, group]: m_groups)
+    {
+        msg_warning("") << group.first << "  " << group.second << " " << actionIndex;
+        if (isInGroup(actionIndex, group))
+            return true;
+    }
+    return false;
+}
+
+bool Track::isInGroup(const int& actionIndex, std::pair<int, int> group)
+{
+    return (group.first <= actionIndex && actionIndex <= group.second);
+}
+
+bool Track::isStricklyInGroup(const int& actionIndex)
+{
+    for (auto [key, group]: m_groups)
+        if (isStricklyInGroup(actionIndex, group))
+            return true;
+
+    return false;
+}
+
+bool Track::isStricklyInGroup(const int& actionIndex, std::pair<int, int> group)
+{
+    return (group.first < actionIndex && actionIndex < group.second);
 }
 
 } // namespace

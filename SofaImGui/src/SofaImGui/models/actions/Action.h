@@ -97,7 +97,7 @@ class Action: public std::enable_shared_from_this< Action >
     class ActionView
     {
        public:
-        virtual bool showBlock(const std::string &, const ImVec2 &) {return false;}
+        virtual bool showBlock(const std::string &, const ImVec2 &, const bool & = false) {return false;}
     };
     ActionView view;
 

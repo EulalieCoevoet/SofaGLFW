@@ -11,22 +11,32 @@
 namespace sofaimgui::widgets
 {
 
-void Block(const char* label, const ImRect &bb, const ImVec4 &color, const float &offset)
+void Block(const char* label, const ImRect &bb, const ImVec4 &color,  const bool& isSelected)
 {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
 
     ImRect blockbb = bb;
-    blockbb.Min.y -= offset;
     const ImGuiID id = ImGui::GetID(label);
     if (!ImGui::ItemAdd(blockbb, id))
         return;
 
     { // Block background
-        drawList->AddRectFilled(ImVec2(bb.Min.x, bb.Min.y - offset),
+        drawList->AddRectFilled(ImVec2(bb.Min.x, bb.Min.y),
                                 ImVec2(bb.Max.x, bb.Max.y),
                                 ImGui::GetColorU32(color),
                                 ImGui::GetStyle().FrameRounding,
                                 ImDrawFlags_None);
+
+        if (isSelected)
+        {
+            const float t = ProgramSizes().BlockSelectionSize * 0.5;
+            drawList->AddRect(ImVec2(bb.Min.x - t, bb.Min.y - t),
+                              ImVec2(bb.Max.x + t, bb.Max.y + t),
+                              COLOR_LIGHT_BLUE,
+                              ImGui::GetStyle().FrameRounding,
+                              ImDrawFlags_None,
+                              ProgramSizes().BlockSelectionSize);
+        }
     }
 
     { // Title background
@@ -42,69 +52,7 @@ void Block(const char* label, const ImRect &bb, const ImVec4 &color, const float
     }
 }
 
-void ActionBlock(const char* label, const ImRect &bb, const ImVec4 &color)
-{
-    Block(label, bb, color, 0.);
-}
-
-void ModifierBlock(const char* label, const ImRect &bb, double *dragleft, double *dragright, const ImVec4 &color)
-{
-    float x = bb.Min.x ;
-    float y = bb.Min.y ;
-
-    ImVec2 size = bb.GetSize();
-    ImVec2 dragSize(2.f, size.y);
-    ImRect bbLeft(ImVec2(x, y), ImVec2(x + dragSize.x, y + size.y));
-    ImRect bbRight(ImVec2(x + size.x - dragSize.x, y), ImVec2(x + size.x, y + size.y));
-
-    std::string labelLeft = label;
-    labelLeft += "dragLeft";
-    Drag(labelLeft.c_str(), bbLeft, dragleft);
-
-    std::string labelRight = label;
-    labelRight += "dragRight";
-    Drag(labelRight.c_str(), bbRight, dragright);
-
-    Block(label, bb, color, size.y + ImGui::GetStyle().FramePadding.y);
-}
-
-void Drag(const char* label, const ImRect &bb, double *value)
-{
-    ImGuiWindow* window = ImGui::GetCurrentWindow();
-
-    const ImGuiID id = ImGui::GetID(label);
-    if (!ImGui::ItemAdd(bb, id))
-        return;
-
-    ImGuiContext& g = *GImGui;
-    const bool hovered = ImGui::ItemHoverable(bb, id, g.LastItemData.ItemFlags);
-    const bool clicked = hovered && ImGui::IsMouseClicked(ImGuiMouseButton_Left, ImGuiInputFlags_None, id);
-    const bool makeActive = (clicked || g.NavActivateId == id);
-
-    if (hovered || ImGui::IsMouseDown(0, id))
-        ImGui::SetMouseCursor(ImGuiMouseCursor_ResizeEW);
-
-    if (clicked)
-        ImGui::SetKeyOwner(ImGuiKey_MouseLeft, id);
-
-    if (makeActive)
-    {
-        ImGui::SetActiveID(id, window);
-        ImGui::SetFocusID(id, window);
-        ImGui::FocusWindow(window);
-        g.ActiveIdUsingNavDirMask |= (1 << ImGuiDir_Left) | (1 << ImGuiDir_Right);
-    }
-
-    double min = -500;
-    double max = 500;
-    const bool valueChanged = ImGui::DragBehavior(id, ImGuiDataType_Double,
-                                                   value, 1., &min, &max, "%0.2f",
-                                                   ImGuiSliderFlags_NoInput);
-    if (valueChanged)
-        ImGui::MarkItemEdited(id);
-}
-
-void BeginBlock(const std::string &label, const ImVec2 &size, const ImVec4& color)
+void BeginBlock(const std::string &label, const ImVec2 &size, const ImVec4& color, const bool &isSelected)
 {
     ImGuiWindow* window = ImGui::GetCurrentWindow();
 
@@ -114,7 +62,7 @@ void BeginBlock(const std::string &label, const ImVec2 &size, const ImVec4& colo
     window->DC.CursorStartPos.y = y;
 
     ImRect bb(ImVec2(x, y), ImVec2(x + size.x, y + size.y));
-    sofaimgui::widgets::ActionBlock(label.c_str(), bb, color);
+    sofaimgui::widgets::Block(label.c_str(), bb, color, isSelected);
 
     auto rectMin = ImGui::GetItemRectMin();
     auto rectMax = ImGui::GetItemRectMax();
@@ -122,7 +70,7 @@ void BeginBlock(const std::string &label, const ImVec2 &size, const ImVec4& colo
     ImGui::PushClipRect(rectMin, rectMax, true);
 }
 
-void EndBlock(const ImVec2 &size)
+void EndBlock(const std::string &label, const ImVec2 &size)
 {
     ImGuiWindow* window = ImGui::GetCurrentWindow();
 
@@ -130,6 +78,14 @@ void EndBlock(const ImVec2 &size)
     window->DC.CursorPosPrevLine.y = window->DC.CursorStartPos.y;
 
     ImGui::PopClipRect();
+
+    float x = window->DC.CursorStartPos.x ;
+    float y = window->DC.CursorStartPos.y ;
+    ImRect bb(ImVec2(x, y), ImVec2(x + size.x, y + size.y));
+
+    const ImGuiID id = ImGui::GetID(&label);
+    if (!ImGui::ItemAdd(bb, id))
+        return;
 }
 
 void BlockHeader(const char* icon, char* label, bool& hasValuesChanged)
@@ -172,7 +128,7 @@ void BlockHeader(const char* icon, char* label, bool& hasValuesChanged)
     ImGui::PopStyleColor();
 
     window->DC.CursorPosPrevLine.x = x;
-    window->DC.CursorPosPrevLine.y = y;
+    window->DC.CursorPosPrevLine.y = y + ImGui::GetStyle().FramePadding.y * 0.5;
 }
 
 void BeginBlockLine(const char* label)

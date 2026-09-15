@@ -405,7 +405,7 @@ bool Program::isValid()
 void Program::clearTrackSelected()
 {
     if (m_selectedTrack >= 0 && m_selectedTrack < (int)m_tracks.size())
-        m_tracks[m_selectedTrack]->clearActionSelected();
+        m_tracks[m_selectedTrack]->clearSelectedActions();
     m_selectedTrack = -1;
 }
 } // namespace

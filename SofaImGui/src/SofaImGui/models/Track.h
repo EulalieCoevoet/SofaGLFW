@@ -61,12 +61,18 @@ class Track
 
     void swapActions(const sofa::Index& actionIndex1, const sofa::Index& actionIndex2);
 
-    bool isActionSelected(sofa::Index index);
-    void setActionSelected(sofa::Index index);
-    void clearActionSelected() {m_selectedActions.first=-1; m_selectedActions.second=-1;}
+    bool isActionSelected(const sofa::Index &index);
+    void setActionSelected(const sofa::Index &index);
+    void clearSelectedActions();
 
     void group();
-    void ungroup(actions::Action::SPtr action);
+    void ungroup(const int& actionIndex);
+    bool canGroup(const int& actionIndex);
+    bool canUngroup(const int& actionIndex);
+    bool isInGroup(const int& actionIndex);
+    bool isInGroup(const int& actionIndex, std::pair<int, int> group);
+    bool isStricklyInGroup(const int& actionIndex);
+    bool isStricklyInGroup(const int& actionIndex, std::pair<int, int> group);
 
    protected:
 

@@ -546,8 +546,7 @@ bool ProgramWindow::showTrackButtons(const int &trackIndex, const char* const me
     return collapsed;
 }
 
-void ProgramWindow::showBlocks(models::Track::SPtr track,
-                               const int& trackIndex)
+void ProgramWindow::showBlocks(models::Track::SPtr track, const int& trackIndex)
 {
     float blockHeight = ProgramSizes().TrackHeight;
 
@@ -557,9 +556,7 @@ void ProgramWindow::showBlocks(models::Track::SPtr track,
     showActionBlocks(blockHeight, trackIndex, track);
 }
 
-void ProgramWindow::showStartMoveBlock(const float& blockHeight,
-                                       const sofa::Index& trackIndex,
-                                       models::Track::SPtr track)
+void ProgramWindow::showStartMoveBlock(const float& blockHeight, const sofa::Index& trackIndex, models::Track::SPtr track)
 {
     auto startmove = track->getStartMove();
 
@@ -580,14 +577,14 @@ void ProgramWindow::showStartMoveBlock(const float& blockHeight,
     }
 }
 
-void ProgramWindow::showActionBlocks(const float& blockHeight,
-                                   const sofa::Index& trackIndex,
-                                   models::Track::SPtr track)
+void ProgramWindow::showActionBlocks(const float& blockHeight, const sofa::Index& trackIndex, models::Track::SPtr track)
 {
     const auto &actions = track->getActions();
     sofa::Index actionIndex = 0;
-    if (!ImGui::IsWindowFocused())
-        track->clearActionSelected();
+
+    bool actionSelected = false;
+    static sofa::Index actionIndexContextMenu = 0;
+    const std::string actionContextMenuLabel = "##ActionContextMenuLabel";
 
     while(actionIndex < actions.size())
     {
@@ -595,6 +592,7 @@ void ProgramWindow::showActionBlocks(const float& blockHeight,
 
         models::actions::Action::SPtr action = actions[actionIndex];
         bool isSelected = track->isActionSelected(actionIndex);
+        bool openPopUp = false;
 
         float blockWidth = (m_ws_timeBasedDisplay? action->getDuration(): 1.f) * ProgramSizes().TimelineOneSecondSize - ImGui::GetStyle().ItemSpacing.x;
         std::string blockLabel = "##Action" + std::to_string(trackIndex) + std::to_string(actionIndex);
@@ -610,17 +608,20 @@ void ProgramWindow::showActionBlocks(const float& blockHeight,
         if (move)
         {
             move->setDrawTrajectory(m_ws_drawTrajectory);
-            if(move->getView()->showBlock(blockLabel, blockSize))
+            if(move->getView()->showBlock(blockLabel, blockSize, isSelected))
             {
                 track->updateNextMoveInitialPoint(actionIndex, move->getWaypoint());
             }
         }
         else
         {
-            action->getView()->showBlock(blockLabel, blockSize);
+            action->getView()->showBlock(blockLabel, blockSize, isSelected);
         }
 
-        if (isSelected) // TODO
+        if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
+            openPopUp = true;
+
+        if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
         {
             if (!m_program.isTrackSelected(trackIndex))
             {
@@ -628,6 +629,7 @@ void ProgramWindow::showActionBlocks(const float& blockHeight,
                 m_program.setTrackSelected(trackIndex);
             }
             track->setActionSelected(actionIndex);
+            actionSelected = true;
         }
 
         actionIndex = addActionBlockMenu(menuLabel, actionIndex, trackIndex, track, action);
@@ -637,7 +639,20 @@ void ProgramWindow::showActionBlocks(const float& blockHeight,
         showBetweenBlocksButtons(ImVec2(x, y + blockHeight / 2.f), actionIndex - 1, track, trackIndex);
 
         ImGui::PopID();
+
+        if (openPopUp)
+        {
+            ImGui::OpenPopup(actionContextMenuLabel.c_str());
+            actionIndexContextMenu = actionIndex - 1;
+        }
     }
+
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !actionSelected)
+    {
+        track->clearSelectedActions();
+    }
+
+    addActionsContextMenu(actionContextMenuLabel, actionIndexContextMenu);
 }
 
 void ProgramWindow::showBetweenBlocksButtons(const ImVec2 &position,
@@ -722,8 +737,7 @@ void ProgramWindow::showBetweenBlocksButtons(const ImVec2 &position,
     window->DC.CursorPos.y = backuppos.y + ProgramSizes().TrackHeight + ImGui::GetStyle().ItemSpacing.x;
 }
 
-void ProgramWindow::showBlockOptionButton(const std::string &menulabel,
-                                           const std::string &label)
+void ProgramWindow::showBlockOptionButton(const std::string &menulabel, const std::string &label)
 {
     ImGuiWindow* window = ImGui::GetCurrentWindow();
     auto backuppos = window->DC.CursorPosPrevLine;
@@ -1166,6 +1180,52 @@ sofa::Index ProgramWindow::addTrackMenu(const std::string& menuLabel, const sofa
         ImGui::EndPopup();
     }
     return index;
+}
+
+void ProgramWindow::addActionsContextMenu(const std::string& label, const int& actionIndex)
+{
+    if (ImGui::BeginPopup(label.c_str()))
+    {
+        auto tracks = m_program.getTracks();
+        int trackIndex = m_program.getTrackSelected();
+        bool valid = (trackIndex>=0 && trackIndex<(int)tracks.size());
+
+        { // Group
+            if (!valid || !tracks[trackIndex]->canGroup(actionIndex))
+                ImGui::BeginDisabled();
+
+            if (ImGui::MenuItem("Group"))
+            {
+                if (valid)
+                {
+                    auto track = tracks[trackIndex];
+                    track->group();
+                }
+            }
+
+            if (!valid || !tracks[trackIndex]->canGroup(actionIndex))
+                ImGui::EndDisabled();
+        }
+
+        { // Ungroup
+            if (!valid || !tracks[trackIndex]->canUngroup(actionIndex))
+                ImGui::BeginDisabled();
+
+            if (ImGui::MenuItem("Ungroup"))
+            {
+                if (valid)
+                {
+                    auto track = tracks[trackIndex];
+                    track->ungroup(actionIndex);
+                }
+            }
+
+            if (!valid || !tracks[trackIndex]->canUngroup(actionIndex))
+                ImGui::EndDisabled();
+        }
+
+        ImGui::EndPopup();
+    }
 }
 
 } // namespace

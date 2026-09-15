@@ -67,6 +67,7 @@ class SOFAIMGUI_API Program
 
     bool isTrackSelected(sofa::Index index) {return ((int)index == m_selectedTrack);}
     void setTrackSelected(sofa::Index index) {m_selectedTrack = index;}
+    int getTrackSelected() {return m_selectedTrack;}
     void clearTrackSelected();
 
    protected:

@@ -119,14 +119,13 @@ class SOFAIMGUI_API ProgramWindow : public BaseWindow
                                     std::shared_ptr<models::actions::Action> action);
 
     bool addAddActionMenu(std::shared_ptr<models::Track> track, const int &trackIndex, const int &actionIndex);
-
     sofa::Index addTrackMenu(const std::string& menuLabel, const sofa::Index& trackIndex, std::shared_ptr<models::Track> track);
+    void addActionsContextMenu(const std::string &label, const int &actionIndex);
 
     void saveProgramDirAndFilename(const std::string& filename);
 
     bool isDrivingSimulation() {return drivingWindow == DrivingWindow::PROGRAM;}
     void setTime(const double &time);
-
 };
 
 } // namespace
