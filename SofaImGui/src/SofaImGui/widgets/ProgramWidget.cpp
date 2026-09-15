@@ -11,7 +11,7 @@
 namespace sofaimgui::widgets
 {
 
-void Block(const char* label, const ImRect &bb, const ImVec4 &color,  const bool& isSelected)
+void BlockBackground(const char* label, const ImRect &bb, const ImVec4 &color, const bool& isSelected)
 {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
 
@@ -39,7 +39,7 @@ void Block(const char* label, const ImRect &bb, const ImVec4 &color,  const bool
         }
     }
 
-    { // Title background
+    { // Header background
         ImVec2 padding(ImGui::GetStyle().FramePadding);
         if (bb.Min.x + padding.x < bb.Max.x - padding.x)
         {
@@ -62,7 +62,7 @@ void BeginBlock(const std::string &label, const ImVec2 &size, const ImVec4& colo
     window->DC.CursorStartPos.y = y;
 
     ImRect bb(ImVec2(x, y), ImVec2(x + size.x, y + size.y));
-    sofaimgui::widgets::Block(label.c_str(), bb, color, isSelected);
+    sofaimgui::widgets::BlockBackground(label.c_str(), bb, color, isSelected);
 
     auto rectMin = ImGui::GetItemRectMin();
     auto rectMax = ImGui::GetItemRectMax();

@@ -6,11 +6,8 @@
 namespace sofaimgui::widgets
 {
 
-/// Draws a colored block with a title area.
-void Block(const char* label, const ImRect &bb, const ImVec4 &color, const bool &isSelected);
-
-/// Draws a draggable area within the specified bounding box.
-void Drag(const char* label, const ImRect &bb, double *value);
+/// Draws a colored block with a header area.
+void BlockBackground(const char* label, const ImRect &bb, const ImVec4 &color, const bool& isSelected);
 
 /// Begin drawing a program block
 void BeginBlock(const std::string &label, const ImVec2 &size, const ImVec4 &color, const bool & isSelected = false);
