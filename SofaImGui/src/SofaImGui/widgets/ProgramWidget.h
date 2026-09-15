@@ -6,8 +6,8 @@
 namespace sofaimgui::widgets
 {
 
-/// Draws a colored block with a title area.
-void Block(const char* label, const ImRect &bb, const ImVec4 &color, const float &offset);
+/// Draws a colored block with a header area.
+void BlockBackground(const char* label, const ImRect &bb, const ImVec4 &color, const float &offset);
 
 /// Draws an action block.
 void ActionBlock(const char* label, const ImRect &bb, const ImVec4 &color);

@@ -11,7 +11,7 @@
 namespace sofaimgui::widgets
 {
 
-void Block(const char* label, const ImRect &bb, const ImVec4 &color, const float &offset)
+void BlockBackground(const char* label, const ImRect &bb, const ImVec4 &color, const float &offset)
 {
     ImDrawList* drawList = ImGui::GetWindowDrawList();
 
@@ -44,7 +44,7 @@ void Block(const char* label, const ImRect &bb, const ImVec4 &color, const float
 
 void ActionBlock(const char* label, const ImRect &bb, const ImVec4 &color)
 {
-    Block(label, bb, color, 0.);
+    BlockBackground(label, bb, color, 0.);
 }
 
 void ModifierBlock(const char* label, const ImRect &bb, double *dragleft, double *dragright, const ImVec4 &color)
@@ -65,7 +65,7 @@ void ModifierBlock(const char* label, const ImRect &bb, double *dragleft, double
     labelRight += "dragRight";
     Drag(labelRight.c_str(), bbRight, dragright);
 
-    Block(label, bb, color, size.y + ImGui::GetStyle().FramePadding.y);
+    BlockBackground(label, bb, color, size.y + ImGui::GetStyle().FramePadding.y);
 }
 
 void Drag(const char* label, const ImRect &bb, double *value)
