@@ -51,8 +51,9 @@ class Track
 
     std::shared_ptr<actions::StartMove> getStartMove() {return m_startmove;}
 
-    std::vector<std::shared_ptr<actions::Action>>& getActions() {return m_actions;}
-    std::shared_ptr<actions::Action> getAction(const sofa::Index& actionIndex) {return m_actions[actionIndex];}
+    std::vector<actions::Action::SPtr>& getActions() {return m_actions;}
+    actions::Action::SPtr getAction(const sofa::Index& actionIndex) {return m_actions[actionIndex];}
+    sofa::Index getActionIndex(actions::Action::SPtr action);
 
     void updateNextMoveInitialPoint(const sofa::Index &actionIndex, const RigidCoord &initialPoint);
 
@@ -61,7 +62,7 @@ class Track
 
     void swapActions(const sofa::Index& actionIndex1, const sofa::Index& actionIndex2);
 
-    bool isActionSelected(const sofa::Index &index);
+    bool isActionSelected(const sofa::Index &actionIndex);
     void setActionSelected(const sofa::Index &index);
     void clearSelectedActions();
 
@@ -69,18 +70,18 @@ class Track
     void ungroup(const int& actionIndex);
     bool canGroup(const int& actionIndex);
     bool canUngroup(const int& actionIndex);
-    bool isInGroup(const int& actionIndex);
-    bool isInGroup(const int& actionIndex, std::pair<int, int> group);
-    bool isStricklyInGroup(const int& actionIndex);
-    bool isStricklyInGroup(const int& actionIndex, std::pair<int, int> group);
+    bool isInGroup(const int& actionIndex, bool strictly = false);
 
    protected:
 
     std::shared_ptr<actions::StartMove> m_startmove;
     std::vector<actions::Action::SPtr> m_actions;
-    std::map<actions::Action::SPtr, std::pair<int, int>> m_groups;
+    std::map<actions::Action::SPtr, int> m_groups; /// Map of groups: key = first action sptr, value = length of the group
 
     std::pair<int, int> m_selectedActions{-1,-1};
+
+    bool canGroupSelectedActions();
+    bool isInGroup(const int& actionIndex, std::pair<actions::Action::SPtr, int> group, bool strictly = false);
 };
 
 } // namespace

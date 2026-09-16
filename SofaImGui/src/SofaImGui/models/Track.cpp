@@ -52,6 +52,12 @@ void Track::clear()
     m_actions.clear();
 }
 
+sofa::Index Track::getActionIndex(actions::Action::SPtr action)
+{
+    auto it = std::find(m_actions.begin(), m_actions.end(), action);
+    return it - m_actions.begin();
+}
+
 std::shared_ptr<actions::Move> Track::getPreviousMove(const sofa::Index &actionIndex)
 {
     if (actionIndex==0 || m_actions.empty())
@@ -99,9 +105,9 @@ void Track::swapActions(const sofa::Index& actionIndex1, const sofa::Index& acti
     }
 }
 
-bool Track::isActionSelected(const sofa::Index& index)
+bool Track::isActionSelected(const sofa::Index& actionIndex)
 {
-    int i = index;
+    int i = actionIndex;
     return (m_selectedActions.first == i || (m_selectedActions.first <= i && i <= m_selectedActions.second));
 }
 
@@ -142,20 +148,25 @@ void Track::clearSelectedActions()
 
 void Track::group()
 {
-    if (m_selectedActions.first != -1 && m_selectedActions.second != -1)
-        m_groups[m_actions[m_selectedActions.first]] = m_selectedActions;
+    if (canGroupSelectedActions())
+        m_groups[m_actions[m_selectedActions.first]] = m_selectedActions.second - m_selectedActions.first;
 }
 
 void Track::ungroup(const int &actionIndex)
 {
-    for (auto [key, group]: m_groups)
-        if (isInGroup(actionIndex, group))
+    for (auto [key, length]: m_groups)
+    {
+        if (isInGroup(actionIndex, std::pair<actions::Action::SPtr, int>(key, length)))
+        {
             m_groups.erase(key);
+            return;
+        }
+    }
 }
 
 bool Track::canGroup(const int& actionIndex)
 {
-    return isActionSelected(actionIndex) && (m_selectedActions.first < m_selectedActions.second) && !canUngroup(actionIndex);
+    return isActionSelected(actionIndex) && !canUngroup(actionIndex) && canGroupSelectedActions();
 }
 
 bool Track::canUngroup(const int& actionIndex)
@@ -163,36 +174,31 @@ bool Track::canUngroup(const int& actionIndex)
     return isInGroup(actionIndex);
 }
 
-bool Track::isInGroup(const int& actionIndex)
+bool Track::isInGroup(const int& actionIndex, bool strictly)
 {
-    for (auto [key, group]: m_groups)
+    for (auto [key, length]: m_groups)
     {
-        msg_warning("") << group.first << "  " << group.second << " " << actionIndex;
-        if (isInGroup(actionIndex, group))
+        if (isInGroup(actionIndex, std::pair<actions::Action::SPtr, int>(key, length), strictly))
             return true;
     }
     return false;
 }
 
-bool Track::isInGroup(const int& actionIndex, std::pair<int, int> group)
+bool Track::isInGroup(const int& actionIndex, std::pair<actions::Action::SPtr, int> group, bool strictly)
 {
-    return (group.first <= actionIndex && actionIndex <= group.second);
+    int firstIndex = getActionIndex(group.first);
+    int lastIndex = firstIndex + group.second;
+
+    if (strictly)
+        return (firstIndex < actionIndex && actionIndex < lastIndex);
+
+    return (firstIndex <= actionIndex && actionIndex <= lastIndex);
 }
 
-bool Track::isStricklyInGroup(const int& actionIndex)
+bool Track::canGroupSelectedActions()
 {
-    for (auto [key, group]: m_groups)
-        if (isStricklyInGroup(actionIndex, group))
-            return true;
-
-    return false;
+    return m_selectedActions.first != -1 && m_selectedActions.second != -1 && m_selectedActions.first < m_selectedActions.second;
 }
-
-bool Track::isStricklyInGroup(const int& actionIndex, std::pair<int, int> group)
-{
-    return (group.first < actionIndex && actionIndex < group.second);
-}
-
 } // namespace
 
 

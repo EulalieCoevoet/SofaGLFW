@@ -647,12 +647,10 @@ void ProgramWindow::showActionBlocks(const float& blockHeight, const sofa::Index
         }
     }
 
-    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !actionSelected)
-    {
-        track->clearSelectedActions();
-    }
-
     addActionsContextMenu(actionContextMenuLabel, actionIndexContextMenu);
+
+    if (ImGui::IsMouseClicked(ImGuiMouseButton_Left) && !actionSelected)
+        track->clearSelectedActions();
 }
 
 void ProgramWindow::showBetweenBlocksButtons(const ImVec2 &position,
@@ -1194,7 +1192,8 @@ void ProgramWindow::addActionsContextMenu(const std::string& label, const int& a
             if (!valid || !tracks[trackIndex]->canGroup(actionIndex))
                 ImGui::BeginDisabled();
 
-            if (ImGui::MenuItem("Group"))
+            ImGui::MenuItem("Group");
+            if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) // These two steps are required to capture the click before clearing the selected actions
             {
                 if (valid)
                 {
@@ -1211,7 +1210,8 @@ void ProgramWindow::addActionsContextMenu(const std::string& label, const int& a
             if (!valid || !tracks[trackIndex]->canUngroup(actionIndex))
                 ImGui::BeginDisabled();
 
-            if (ImGui::MenuItem("Ungroup"))
+            ImGui::MenuItem("Ungroup");
+            if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
             {
                 if (valid)
                 {
