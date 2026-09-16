@@ -72,7 +72,7 @@ void ProgramWindow::clearWindow()
 }
 
 void ProgramWindow::onEndSimulationLoad()
-{
+{   
     if (m_program.isEmpty())
     {
         m_program = models::Program(m_kinematicsGUIDataManager);
@@ -889,10 +889,16 @@ void ProgramWindow::exportProgram(const bool &exportAs)
 
 void ProgramWindow::saveProgramDirAndFilename(const std::string& filename)
 {
-    std::filesystem::path path = filename;
+    if (sofa::helper::system::FileSystem::exists(filename))
+    {
+        std::filesystem::path path = filename;
 
-    m_ws_programDirPath = path.parent_path().string(); // store chosen dir path
-    m_ws_programFilename = path.filename().string(); // store chosen filename
+        if (path.extension() == m_program.getExtension() && path.has_parent_path() && path.has_filename())
+        {
+            m_ws_programDirPath = path.parent_path().string(); // store chosen dir path
+            m_ws_programFilename = path.filename().string(); // store chosen filename
+        }
+    }
 }
 
 void ProgramWindow::stepProgram(const double &dt, const bool &reverse)
