@@ -1192,41 +1192,42 @@ void ProgramWindow::addActionsContextMenu(const std::string& label, const int& a
     {
         auto tracks = m_program.getTracks();
         int trackIndex = m_program.getTrackSelected();
-        bool valid = (trackIndex>=0 && trackIndex<(int)tracks.size());
+
+        models::Track::SPtr track = nullptr;
+        if (trackIndex>=0 && trackIndex<(int)tracks.size())
+            track = tracks[trackIndex];
 
         { // Group
-            if (!valid || !tracks[trackIndex]->canGroup(actionIndex))
+            bool disabled = (track == nullptr) || !track->canGroup(actionIndex);
+
+            if (disabled)
                 ImGui::BeginDisabled();
 
             ImGui::MenuItem("Group");
             if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) // These two steps are required to capture the click before clearing the selected actions
             {
-                if (valid)
-                {
-                    auto track = tracks[trackIndex];
+                if (track)
                     track->group();
-                }
             }
 
-            if (!valid || !tracks[trackIndex]->canGroup(actionIndex))
+            if (disabled)
                 ImGui::EndDisabled();
         }
 
         { // Ungroup
-            if (!valid || !tracks[trackIndex]->canUngroup(actionIndex))
+            bool disabled = (track == nullptr) || !track->canUngroup(actionIndex) || track->hasSelectedActions();
+
+            if (disabled)
                 ImGui::BeginDisabled();
 
             ImGui::MenuItem("Ungroup");
             if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
             {
-                if (valid)
-                {
-                    auto track = tracks[trackIndex];
+                if (track)
                     track->ungroup(actionIndex);
-                }
             }
 
-            if (!valid || !tracks[trackIndex]->canUngroup(actionIndex))
+            if (disabled)
                 ImGui::EndDisabled();
         }
 

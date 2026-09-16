@@ -166,7 +166,7 @@ void Track::ungroup(const int &actionIndex)
 
 bool Track::canGroup(const int& actionIndex)
 {
-    return isActionSelected(actionIndex) && !canUngroup(actionIndex) && canGroupSelectedActions();
+    return isActionSelected(actionIndex) && !canUngroupSelectedActions() && canGroupSelectedActions();
 }
 
 bool Track::canUngroup(const int& actionIndex)
@@ -199,6 +199,15 @@ bool Track::canGroupSelectedActions()
 {
     return m_selectedActions.first != -1 && m_selectedActions.second != -1 && m_selectedActions.first < m_selectedActions.second;
 }
+
+bool Track::canUngroupSelectedActions()
+{
+    for (int i = m_selectedActions.first ; i <= m_selectedActions.second ; i++)
+        if (isInGroup(i))
+            return true;
+    return false;
+}
+
 } // namespace
 
 

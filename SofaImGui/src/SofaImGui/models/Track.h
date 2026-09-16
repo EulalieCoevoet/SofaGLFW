@@ -62,6 +62,7 @@ class Track
 
     void swapActions(const sofa::Index& actionIndex1, const sofa::Index& actionIndex2);
 
+    bool hasSelectedActions() {return m_selectedActions.first != -1;}
     bool isActionSelected(const sofa::Index &actionIndex);
     void setActionSelected(const sofa::Index &index);
     void clearSelectedActions();
@@ -81,6 +82,7 @@ class Track
     std::pair<int, int> m_selectedActions{-1,-1};
 
     bool canGroupSelectedActions();
+    bool canUngroupSelectedActions();
     bool isInGroup(const int& actionIndex, std::pair<actions::Action::SPtr, int> group, bool strictly = false);
 };
 
