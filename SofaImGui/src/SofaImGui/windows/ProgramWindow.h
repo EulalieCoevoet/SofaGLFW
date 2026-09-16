@@ -58,7 +58,7 @@ class SOFAIMGUI_API ProgramWindow : public BaseWindow
     bool importProgram(const std::string& filename);
     void exportProgram(const bool &exportAs = true);
 
-    void setProgramFilename(std::string filename) {m_ws_programFilename=filename;}
+    void saveProgramDirAndFilename(const std::string& filename);
 
    protected:
 
@@ -127,8 +127,6 @@ class SOFAIMGUI_API ProgramWindow : public BaseWindow
     bool addAddActionMenu(std::shared_ptr<models::Track> track, const int &trackIndex, const int &actionIndex);
 
     sofa::Index addTrackMenu(const std::string& menuLabel, const sofa::Index& trackIndex, std::shared_ptr<models::Track> track);
-
-    void saveProgramDirAndFilename(const std::string& filename);
 
     bool isDrivingSimulation() {return drivingWindow == DrivingWindow::PROGRAM;}
     void setTime(const double &time);
