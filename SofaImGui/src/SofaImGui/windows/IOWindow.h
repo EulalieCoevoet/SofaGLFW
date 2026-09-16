@@ -106,7 +106,10 @@ class SOFAIMGUI_API ROSNode: public rclcpp::Node
                 size_t nbValue = typeinfo->size();
                 if (vector.size() == nbValue)
                     for (size_t i = 0; i < nbValue; i++)
-                        typeinfo->setScalarValue(data, i, vector[i]);
+                    {
+                        typeinfo->setScalarValue(data->beginEditVoidPtr(), i, vector[i]);
+                        data->endEditVoidPtr();
+                    }
             }
         }
     }

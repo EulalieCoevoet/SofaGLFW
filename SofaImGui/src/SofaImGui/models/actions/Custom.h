@@ -19,46 +19,59 @@
  *                                                                             *
  * Contact information: contact@sofa-framework.org                             *
  ******************************************************************************/
+#pragma once
 
-#include <GUIColors.h>
-#include <IconsFontAwesome6.h>
-#include <imgui.h>
-#include <imgui_internal.h>
-
-#include <ProgramStyle.h>
-#include <SofaImGui/models/actions/Wait.h>
-#include <SofaImGui/widgets/ProgramWidget.h>
+#include <SofaImGui/models/guidata/GUIData.h>
+#include <SofaImGui/models/actions/Action.h>
+#include <SofaImGui/config.h>
 
 
 namespace sofaimgui::models::actions {
 
-bool Wait::WaitView::showBlock(const std::string &label,
-                               const ImVec2 &size)
+class Custom : public Action
 {
-    bool hasValuesChanged = false;
-    ImGuiWindow* window = ImGui::GetCurrentWindow();
+    typedef sofa::defaulttype::RigidCoord<3, double> RigidCoord;
 
-    sofaimgui::widgets::BeginBlock(label, size, ProgramColors().WaitBlockBg);
-    sofaimgui::widgets::BlockHeader(ICON_FA_CIRCLE_PAUSE, wait.getComment(), hasValuesChanged);
+public:
 
-    sofaimgui::widgets::BlockNewLine();
+    Custom(const double& duration = Action::DEFAULTDURATION);
+    ~Custom() = default;
 
-    { // Duration
-        sofaimgui::widgets::BeginBlockLine("duration");
-        double duration = wait.getDuration();
-        std::string id = "##duration" + std::to_string(window->DC.CursorPos.x);
-        if (ImGui::InputDouble(id.c_str(), &duration, 0, 0, "%0.2f", ImGuiInputTextFlags_CharsNoBlank))
-        {
-            hasValuesChanged = true;
-            wait.setDuration(duration);
-        }
-        sofaimgui::widgets::EndBlockLine();
-    }
+    std::shared_ptr<Action> duplicate() override;
+    bool apply(RigidCoord &position, const double &time) override;
+    void computeDuration() override;
+    void computeSpeed() override;
 
-    sofaimgui::widgets::EndBlock(size);
-    return hasValuesChanged;
-}
+    guidata::GUIData::SPtr getData() {return m_data;}
+    bool setData(const std::string& dataPath, sofa::simulation::Node::SPtr groot);
+
+    double getStartValue() {return m_startValue;}
+    void setStartValue(const double& startValue) {m_startValue=startValue;}
+
+    double getEndValue() {return m_endValue;}
+    void setEndValue(const double& endValue) {m_endValue=endValue;}
+
+protected:
+
+    guidata::GUIData::SPtr m_data{nullptr};
+    double m_startValue{0.f};
+    double m_endValue{1.f};
+
+    class CustomView : public ActionView
+    {
+    public:
+        CustomView(Custom &_custom) : custom(_custom) {}
+        bool showBlock(const std::string &label,
+                       const ImVec2 &size) override;
+
+    protected:
+        Custom &custom;
+    };
+    CustomView view;
+
+public :
+
+    ActionView* getView() override {return &view;}
+};
 
 } // namespace
-
-

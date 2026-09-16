@@ -26,6 +26,7 @@
 #include <SofaImGui/models/modifiers/Repeat.h>
 #include <SofaImGui/models/actions/Pick.h>
 #include <SofaImGui/models/actions/Wait.h>
+#include <SofaImGui/models/actions/Custom.h>
 #include <SofaImGui/FooterStatusBar.h>
 
 
@@ -61,7 +62,7 @@ bool Program::checkDocument(const std::string &filename, tinyxml2::XMLNode * roo
     return true;
 }
 
-bool Program::importProgram(const std::string &filename)
+bool Program::importProgram(const std::string &filename, sofa::simulation::Node::SPtr groot)
 {
     if (checkExtension(filename) && isValid())
     {
@@ -165,6 +166,23 @@ bool Program::importProgram(const std::string &filename)
                             if (e->FindAttribute("comment"))
                                 wait->setComment(e->Attribute("comment"));
                             wait->pushToTrack(track);
+                        }
+                        else if (strcmp(e->FirstAttribute()->Value(), "custom") == 0)
+                        {
+                            if (!e->FindAttribute("duration"))
+                                return false;
+                            double duration = e->FindAttribute("duration")->DoubleValue();
+
+                            std::shared_ptr<actions::Custom> custom = std::make_shared<actions::Custom>(duration);
+                            if (e->FindAttribute("comment"))
+                                custom->setComment(e->Attribute("comment"));
+                            if (e->FindAttribute("data"))
+                                custom->setData(e->Attribute("data"), groot);
+                            if (e->FindAttribute("start"))
+                                custom->setStartValue(e->FindAttribute("start")->DoubleValue());
+                            if (e->FindAttribute("end"))
+                                custom->setEndValue(e->FindAttribute("end")->DoubleValue());
+                            custom->pushToTrack(track);
                         }
                     }
 
@@ -333,6 +351,32 @@ void Program::exportProgram(const std::string &filename)
                         xmlTrack->InsertEndChild(xmlWait);
                     }
                     continue;
+                }
+
+                std::shared_ptr<actions::Custom> custom = std::dynamic_pointer_cast<actions::Custom>(action);
+                if (custom) // CUSTOM
+                {
+                    if (custom->getData())
+                    {
+                        tinyxml2::XMLElement * xmlCustom = document.NewElement("action");
+                        if (xmlCustom != nullptr)
+                        {
+                            xmlCustom->SetAttribute("name", "custom");
+                            xmlCustom->SetAttribute("duration", custom->getDuration());
+                            xmlCustom->SetAttribute("comment", custom->getComment());
+                            xmlCustom->SetAttribute("data", custom->getData()->getData()->getPathName().c_str());
+                            xmlCustom->SetAttribute("start", custom->getStartValue());
+                            xmlCustom->SetAttribute("end", custom->getEndValue());
+                            xmlCustom->InsertEndChild(xmlCustom);
+                            xmlTrack->InsertEndChild(xmlCustom);
+                        }
+                        continue;
+                    }
+                    else
+                    {
+                        std::string comment = custom->getComment();
+                        FooterStatusBar::getInstance().setTempMessage("Cannot export " + comment + " block because no data was provided", FooterStatusBar::MessageType::MWARNING);
+                    }
                 }
             }
             const auto modifiers = track->getModifiers();
