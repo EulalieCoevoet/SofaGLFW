@@ -55,7 +55,7 @@ class SOFAIMGUI_API Program
     const std::vector<Track::SPtr>& getTracks() {return m_tracks;}
     int getNbTracks() {return m_tracks.size();}
 
-    void addTrack(Track::SPtr track) {m_tracks.push_back(track);}
+    void addTrack(Track::SPtr track, const sofa::Index &index=0) {m_tracks.insert(m_tracks.begin() + index, track);}
     void removeTrack(const sofa::Index &index) {m_tracks.erase(m_tracks.begin() + index);}
     void clearTracks();
 

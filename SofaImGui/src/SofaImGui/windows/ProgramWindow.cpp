@@ -1168,7 +1168,7 @@ sofa::Index ProgramWindow::addTrackMenu(const std::string& menuLabel, const sofa
         }
         if (ImGui::MenuItem(("Add track##" + std::to_string(index)).c_str(), nullptr, false))
         {
-            m_program.addTrack(std::make_shared<models::Track>(m_kinematicsGUIDataManager));
+            m_program.addTrack(std::make_shared<models::Track>(m_kinematicsGUIDataManager), index+1);
         }
         if (ImGui::MenuItem(("Remove track##" + std::to_string(index)).c_str(), nullptr, false, (index>0)? true : false))
         {
