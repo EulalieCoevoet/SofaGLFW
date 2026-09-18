@@ -20,59 +20,71 @@
  * Contact information: contact@sofa-framework.org                             *
  ******************************************************************************/
 
-#include <SofaImGui/models/actions/Pick.h>
+#include "IconsFontAwesome6.h"
+#include <SofaImGui/models/actions/Custom.h>
+#include <SofaImGui/FooterStatusBar.h>
 
 namespace sofaimgui::models::actions {
 
-bool Pick::gripperInstalled = false;
-double Pick::minClosingDistance = 0;
-double Pick::maxOpeningDistance = 0;
-sofa::core::BaseData* Pick::distance = nullptr;
-
-
-Pick::Pick(const double &duration, const bool& release, const double &closingDistance, const double &openingDistance)
-    : Action(duration)
-    , m_release(release)
-    , m_closingDistance(closingDistance)
-    , m_openingDistance(openingDistance)
-    , view(*this)
+Custom::Custom(const double &duration): Action(duration),
+    view(*this)
 {
-    setComment("Pick");
+    setComment("Custom");
+    computeSpeed();
 }
 
-std::shared_ptr<BaseBlock> Pick::duplicate()
+void Custom::computeSpeed()
 {
-    auto pick = std::make_shared<models::actions::Pick>(m_duration,
-                                                        m_release,
-                                                        m_closingDistance,
-                                                        m_openingDistance);
-    return pick;
+    m_speed = fabs(m_startValue - m_endValue) / m_duration;
 }
 
-
-void Pick::setDuration(const double& duration)
+void Custom::computeDuration()
 {
-    m_duration = duration;
+    m_duration = fabs(m_startValue - m_endValue) / m_speed;
     checkDuration();
 }
 
-bool Pick::apply(RigidCoord &position, const double &time)
+std::shared_ptr<BaseBlock> Custom::duplicate()
+{
+    auto custom = std::make_shared<models::actions::Custom>(m_duration);
+    return custom;
+}
+
+bool Custom::apply(RigidCoord &position, const double &time)
 {
     SOFA_UNUSED(position);
     SOFA_UNUSED(time);
 
-    if(gripperInstalled && distance)
+    if(m_data && m_data->isValid())
     {
+        auto d = m_data->getData();
         double alpha = time / m_duration;
-        if (m_release)
+        double value = (1-alpha) * m_startValue + alpha * m_endValue;
+        d->getValueTypeInfo()->setScalarValue(d->beginEditVoidPtr(), 0, value);
+        d->endEditVoidPtr();
+    }
+
+    return false;
+}
+
+bool Custom::setData(const std::string& dataPath, sofa::simulation::Node::SPtr groot)
+{
+    if (groot && !dataPath.empty())
+    {
+        sofa::core::BaseData* data;
+        if (groot->findDataLinkDest(data, "@" + dataPath, nullptr))
         {
-            double dist = alpha * m_openingDistance + (1 - alpha) * m_closingDistance;
-            distance->read(std::to_string(dist));
+            m_data = std::make_shared<guidata::GUIData>(std::make_shared<guidata::OwnedBaseData>(data, false),
+                                                        std::make_shared<guidata::OwnedBaseData>(nullptr, false),
+                                                        std::make_shared<guidata::OwnedBaseData>(nullptr, false),
+                                                        data->getName(),
+                                                        guidata::GUIData::DEFAULTGROUP,
+                                                        "");
+            return true;
         }
         else
         {
-            double dist = alpha * m_closingDistance + (1 - alpha) * m_openingDistance;
-            distance->read(std::to_string(dist));
+            FooterStatusBar::getInstance().setTempMessage("Data path " + dataPath + " does not exist.", FooterStatusBar::MessageType::MWARNING);
         }
     }
 
@@ -80,5 +92,3 @@ bool Pick::apply(RigidCoord &position, const double &time)
 }
 
 } // namespace
-
-

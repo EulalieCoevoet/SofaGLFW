@@ -21,83 +21,58 @@
  ******************************************************************************/
 #pragma once
 
-#include <sofa/type/Vec.h>
-#include <sofa/defaulttype/RigidTypes.h>
-
-#include <sofa/simulation/Node.h>
+#include <SofaImGui/models/guidata/GUIData.h>
 #include <SofaImGui/models/actions/Action.h>
-#include <SofaImGui/models/guidata/KinematicsGUIDataManager.h>
+#include <SofaImGui/config.h>
+
 
 namespace sofaimgui::models::actions {
 
-class StartMove : public Action
+class Custom : public Action
 {
     typedef sofa::defaulttype::RigidCoord<3, double> RigidCoord;
-    typedef sofa::defaulttype::Rigid3Types::VecCoord VecCoord;
 
-   public:
+public:
 
-    typedef std::shared_ptr<StartMove> SPtr;
+    Custom(const double& duration = Action::DEFAULTDURATION);
+    ~Custom() = default;
 
-    StartMove(const RigidCoord& initialPoint,
-              const RigidCoord& waypoint,
-              const double& duration,
-              guidata::KinematicsGUIDataManager::SPtr kinematicsGUIDataManager,
-              const bool& freeInRotation = true);
-
-    virtual ~StartMove();
-    
-    models::BaseBlock::SPtr duplicate() override {return nullptr;}
-
-    bool apply(RigidCoord&, const double &time) override;
+    std::shared_ptr<BaseBlock> duplicate() override;
+    bool apply(RigidCoord &position, const double &time) override;
     void computeDuration() override;
     void computeSpeed() override;
-    void setDuration(const double& duration) override;
-    void setSpeed(const double& speed) override;
 
-    const RigidCoord& getInitialPoint() {return m_initialPoint;}
-    const RigidCoord& getWaypoint() {return m_waypoint;}
+    guidata::GUIData::SPtr getData() {return m_data;}
+    bool setData(const std::string& dataPath, sofa::simulation::Node::SPtr groot);
 
-    virtual void setWaypoint(const RigidCoord& waypoint);
-    virtual void setInitialPoint(const RigidCoord& initialPoint);
-    virtual RigidCoord getInterpolatedPosition(const double& time);
+    double getStartValue() {return m_startValue;}
+    void setStartValue(const double& startValue) {m_startValue=startValue;}
 
-    bool isFreeInRotation() {return m_freeInRotation;}
-    void setFreeInRotation(const bool &freeInRotation) {m_freeInRotation=freeInRotation;}
+    double getEndValue() {return m_endValue;}
+    void setEndValue(const double& endValue) {m_endValue=endValue;}
 
-   protected:
+protected:
 
-    // TODO: initialPoint, duration and speed is not used here, should be moved to Move.h
-    RigidCoord m_initialPoint;
-    RigidCoord m_waypoint;
+    guidata::GUIData::SPtr m_data{nullptr};
+    double m_startValue{0.f};
+    double m_endValue{1.f};
 
-    double m_minSpeed{10};
-    double m_maxSpeed; // TODO: set
-
-    guidata::KinematicsGUIDataManager::SPtr m_kinematicsGUIDataManager;
-
-    bool m_freeInRotation;
-
-    void checkSpeed();
-
-    class StartMoveView : public ActionView
+    class CustomView : public ActionView
     {
-       public:
-        StartMoveView(StartMove &_start) : start(_start) {}
+    public:
+        CustomView(Custom &_custom) : custom(_custom) {}
 
-       protected:
-        StartMove &start;
+    protected:
+        Custom &custom;
         bool showBlockInternal(const std::string &label,
                                const ImVec2 &size,
                                const bool & = false) override;
     };
-    StartMoveView view;
+    CustomView view;
 
-   public :
+public :
 
     ActionView* getView() override {return &view;}
 };
 
 } // namespace
-
-

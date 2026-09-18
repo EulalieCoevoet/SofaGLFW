@@ -23,9 +23,9 @@
 #include <filesystem>
 #include <sofa/helper/system/Locale.h>
 #include <SofaImGui/models/Program.h>
-#include <SofaImGui/models/modifiers/Repeat.h>
 #include <SofaImGui/models/actions/Pick.h>
 #include <SofaImGui/models/actions/Wait.h>
+#include <SofaImGui/models/actions/Custom.h>
 #include <SofaImGui/FooterStatusBar.h>
 
 
@@ -61,7 +61,7 @@ bool Program::checkDocument(const std::string &filename, tinyxml2::XMLNode * roo
     return true;
 }
 
-bool Program::importProgram(const std::string &filename)
+bool Program::importProgram(const std::string &filename, sofa::simulation::Node::SPtr groot)
 {
     if (checkExtension(filename) && isValid())
     {
@@ -114,7 +114,7 @@ bool Program::importProgram(const std::string &filename)
                             }
                             else
                             {
-                                std::shared_ptr<actions::Move> move;
+                                actions::Move::SPtr move;
                                 if (!e->FindAttribute("type"))
                                     return false;
                                 actions::Move::Type type = static_cast<actions::Move::Type>(e->FindAttribute("type")->IntValue());
@@ -166,33 +166,22 @@ bool Program::importProgram(const std::string &filename)
                                 wait->setComment(e->Attribute("comment"));
                             wait->pushToTrack(track);
                         }
-                    }
-
-                    for(const auto* e = t->FirstChildElement("modifier"); e != nullptr; e = e->NextSiblingElement("modifier"))
-                    {
-                        if (strcmp(e->FirstAttribute()->Value(), "repeat") == 0)
+                        else if (strcmp(e->FirstAttribute()->Value(), "custom") == 0)
                         {
-                            if (!e->FindAttribute("iterations"))
+                            if (!e->FindAttribute("duration"))
                                 return false;
-                            int iterations = e->FindAttribute("iterations")->IntValue();
+                            double duration = e->FindAttribute("duration")->DoubleValue();
 
-                            if (!e->FindAttribute("endTime"))
-                                return false;
-                            double endTime = e->FindAttribute("endTime")->DoubleValue();
-
-                            if (!e->FindAttribute("startTime"))
-                                return false;
-                            double startTime = e->FindAttribute("startTime")->DoubleValue();
-
-                            if (!e->FindAttribute("type"))
-                                return false;
-                            modifiers::Repeat::Type type = static_cast<modifiers::Repeat::Type>(e->FindAttribute("type")->IntValue());
-
-                            std::shared_ptr<modifiers::Repeat> repeat = std::make_shared<modifiers::Repeat>(iterations, endTime, startTime, type);
+                            std::shared_ptr<actions::Custom> custom = std::make_shared<actions::Custom>(duration);
                             if (e->FindAttribute("comment"))
-                                repeat->setComment(e->Attribute("comment"));
-
-                            repeat->pushToTrack(track);
+                                custom->setComment(e->Attribute("comment"));
+                            if (e->FindAttribute("data"))
+                                custom->setData(e->Attribute("data"), groot);
+                            if (e->FindAttribute("start"))
+                                custom->setStartValue(e->FindAttribute("start")->DoubleValue());
+                            if (e->FindAttribute("end"))
+                                custom->setEndValue(e->FindAttribute("end")->DoubleValue());
+                            custom->pushToTrack(track);
                         }
                     }
 
@@ -334,26 +323,31 @@ void Program::exportProgram(const std::string &filename)
                     }
                     continue;
                 }
-            }
-            const auto modifiers = track->getModifiers();
-            for (const auto& modifier: modifiers)
-            {
-                std::shared_ptr<modifiers::Repeat> repeat = std::dynamic_pointer_cast<modifiers::Repeat>(modifier);
-                if (repeat) // REPEAT
+
+                std::shared_ptr<actions::Custom> custom = std::dynamic_pointer_cast<actions::Custom>(action);
+                if (custom) // CUSTOM
                 {
-                    tinyxml2::XMLElement * xmlRepeat = document.NewElement("modifier");
-                    if (xmlRepeat != nullptr)
+                    if (custom->getData())
                     {
-                        xmlRepeat->SetAttribute("name", "repeat");
-                        xmlRepeat->SetAttribute("iterations", repeat->getIterations());
-                        xmlRepeat->SetAttribute("endTime", repeat->getEndTime());
-                        xmlRepeat->SetAttribute("startTime", repeat->getStartTime());
-                        xmlRepeat->SetAttribute("type", repeat->getType());
-                        xmlRepeat->SetAttribute("comment", repeat->getComment());
-                        xmlRepeat->InsertEndChild(xmlRepeat);
-                        xmlTrack->InsertEndChild(xmlRepeat);
+                        tinyxml2::XMLElement * xmlCustom = document.NewElement("action");
+                        if (xmlCustom != nullptr)
+                        {
+                            xmlCustom->SetAttribute("name", "custom");
+                            xmlCustom->SetAttribute("duration", custom->getDuration());
+                            xmlCustom->SetAttribute("comment", custom->getComment());
+                            xmlCustom->SetAttribute("data", custom->getData()->getData()->getPathName().c_str());
+                            xmlCustom->SetAttribute("start", custom->getStartValue());
+                            xmlCustom->SetAttribute("end", custom->getEndValue());
+                            xmlCustom->InsertEndChild(xmlCustom);
+                            xmlTrack->InsertEndChild(xmlCustom);
+                        }
+                        continue;
                     }
-                    continue;
+                    else
+                    {
+                        std::string comment = custom->getComment();
+                        FooterStatusBar::getInstance().setTempMessage("Cannot export " + comment + " block because no data was provided", FooterStatusBar::MessageType::MWARNING);
+                    }
                 }
             }
         }
@@ -408,7 +402,12 @@ bool Program::isValid()
     return !m_tracks.empty() && m_tracks[0] && m_tracks[0]->getStartMove();
 }
 
-
+void Program::clearTrackSelected()
+{
+    if (m_selectedTrack >= 0 && m_selectedTrack < (int)m_tracks.size())
+        m_tracks[m_selectedTrack]->clearSelectedActions();
+    m_selectedTrack = -1;
+}
 } // namespace
 
 
