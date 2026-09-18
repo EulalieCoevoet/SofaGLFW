@@ -90,15 +90,15 @@ class SOFAIMGUI_API ProgramWindow : public BaseWindow
     int  showTracks(); /// Tracks of actions (move, wait, etc.)
     bool showTrackButtons(const int &trackIndex, const char* const menuLabel); /// Menu (clear track, add action, etc.) and collapse option.
 
-    void showBlocks(std::shared_ptr<models::Track> track, const int &trackID); /// Action blocks.
+    void showBlocks(models::Track::SPtr track, const int &trackID); /// Action blocks.
     void showStartMoveBlock(const float& blockHeight,
                            const sofa::Index& trackIndex,
-                            std::shared_ptr<models::Track> track);
+                            models::Track::SPtr track);
     void showActionBlocks(const float& blockHeight,
                             const sofa::Index& trackIndex,
-                            std::shared_ptr<models::Track> track);
+                            models::Track::SPtr track);
 
-    void showBetweenBlocksButtons(const ImVec2 &position, const unsigned int &actionIndex, std::shared_ptr<models::Track> track, const int& trackIndex); /// Add action (plus & swap) buttons
+    void showBetweenBlocksButtons(const ImVec2 &position, const unsigned int &actionIndex, models::Track::SPtr track, const int& trackIndex); /// Add action (plus & swap) buttons
     void showBlockOptionButton(const std::string &menulabel, const std::string &label); /// Menu (add before, add after, delete, etc.).
 
     void showTrackName(const int& trackIndex);
@@ -109,17 +109,17 @@ class SOFAIMGUI_API ProgramWindow : public BaseWindow
     // Menus
     void addStartMoveBlockMenu(const std::string& menuLabel,
                                const sofa::Index& trackIndex,
-                               std::shared_ptr<models::Track> track,
-                               std::shared_ptr<models::actions::StartMove> startmove);
+                               models::Track::SPtr track,
+                               models::actions::StartMove::SPtr startmove);
 
     sofa::Index addActionBlockMenu(const std::string& menuLabel,
                                     const sofa::Index& actionIndex,
                                     const sofa::Index& trackIndex,
-                                    std::shared_ptr<models::Track> track,
-                                    std::shared_ptr<models::actions::Action> action);
+                                    models::Track::SPtr track,
+                                    models::actions::Action::SPtr action);
 
-    bool addAddActionMenu(std::shared_ptr<models::Track> track, const int &trackIndex, const int &actionIndex);
-    sofa::Index addTrackMenu(const std::string& menuLabel, const sofa::Index& trackIndex, std::shared_ptr<models::Track> track);
+    bool addAddActionMenu(models::Track::SPtr track, const int &trackIndex, const int &actionIndex);
+    sofa::Index addTrackMenu(const std::string& menuLabel, const sofa::Index& trackIndex, models::Track::SPtr track);
     void addActionsContextMenu(const std::string &label, const int &actionIndex);
 
     bool isDrivingSimulation() {return drivingWindow == DrivingWindow::PROGRAM;}

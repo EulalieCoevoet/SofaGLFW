@@ -37,7 +37,7 @@ public:
     Custom(const double& duration = Action::DEFAULTDURATION);
     ~Custom() = default;
 
-    std::shared_ptr<Action> duplicate() override;
+    std::shared_ptr<BaseBlock> duplicate() override;
     bool apply(RigidCoord &position, const double &time) override;
     void computeDuration() override;
     void computeSpeed() override;

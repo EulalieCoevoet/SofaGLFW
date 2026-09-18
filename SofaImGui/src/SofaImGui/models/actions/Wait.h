@@ -36,7 +36,7 @@ class Wait : public Action
     Wait(const double& duration = Action::DEFAULTDURATION);
     ~Wait() = default;
 
-    std::shared_ptr<Action> duplicate() override;
+    std::shared_ptr<BaseBlock> duplicate() override;
 
     void setDuration(const double &duration) override;
 

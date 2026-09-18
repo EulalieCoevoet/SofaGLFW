@@ -53,7 +53,7 @@ class Move : public StartMove
 
     virtual ~Move();
 
-    std::shared_ptr<Action> duplicate() override;
+    std::shared_ptr<BaseBlock> duplicate() override;
 
     void setInitialPoint(const RigidCoord& initialPoint) override;
     void setWaypoint(const RigidCoord& waypoint) override;
@@ -69,7 +69,7 @@ class Move : public StartMove
     void pushToTrack(std::shared_ptr<models::Track> track) override;
     void insertInTrack(std::shared_ptr<models::Track> track, const sofa::Index &actionIndex) override;
     void deleteFromTrack(std::shared_ptr<models::Track> track, const sofa::Index &actionIndex) override;
-    void swapWith(std::shared_ptr<Action> action) override;
+    void swapWith(std::shared_ptr<BaseBlock> action) override;
 
    protected:
 

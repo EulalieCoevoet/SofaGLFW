@@ -114,7 +114,7 @@ bool Program::importProgram(const std::string &filename, sofa::simulation::Node:
                             }
                             else
                             {
-                                std::shared_ptr<actions::Move> move;
+                                actions::Move::SPtr move;
                                 if (!e->FindAttribute("type"))
                                     return false;
                                 actions::Move::Type type = static_cast<actions::Move::Type>(e->FindAttribute("type")->IntValue());

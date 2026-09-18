@@ -422,6 +422,7 @@ int ProgramWindow::showTracks()
                 showBlocks(track, trackIndex);
             }
 
+            // Store position
             float x = ImGui::GetCurrentWindow()->DC.CursorPosPrevLine.x ;
             float y = ImGui::GetCurrentWindow()->DC.CursorPosPrevLine.y ;
 
@@ -615,39 +616,50 @@ void ProgramWindow::showActionBlocks(const float& blockHeight, const sofa::Index
         float y = window->DC.CursorPos.y ;
         ImVec2 blockSize(blockWidth, blockHeight);
 
-        models::actions::Move::SPtr move = std::dynamic_pointer_cast<models::actions::Move>(action);
-        if (move)
-        {
-            move->setDrawTrajectory(m_ws_drawTrajectory);
-            if(move->getView()->showBlock(blockLabel, blockSize, isSelected))
+        { // Show group if any
+            if (const int length = track->getGroupLength(action) > 0)
             {
-                track->updateNextMoveInitialPoint(actionIndex, move->getWaypoint());
             }
         }
-        else
-        {
-            action->getView()->showBlock(blockLabel, blockSize, isSelected);
-        }
 
-        if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
-            openPopUp = true;
-
-        if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
-        {
-            if (!m_program.isTrackSelected(trackIndex))
+        { // Show action block
+            models::actions::Move::SPtr move = std::dynamic_pointer_cast<models::actions::Move>(action);
+            if (move)
             {
-                m_program.clearTrackSelected();
-                m_program.setTrackSelected(trackIndex);
+                move->setDrawTrajectory(m_ws_drawTrajectory);
+                if(move->getView()->showBlock(blockLabel, blockSize, isSelected))
+                {
+                    track->updateNextMoveInitialPoint(actionIndex, move->getWaypoint());
+                }
             }
-            track->setActionSelected(actionIndex);
-            actionSelected = true;
+            else
+            {
+                action->getView()->showBlock(blockLabel, blockSize, isSelected);
+            }
+            if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
+                openPopUp = true;
+
+            if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+            {
+                if (!m_program.isTrackSelected(trackIndex))
+                {
+                    m_program.clearTrackSelected();
+                    m_program.setTrackSelected(trackIndex);
+                }
+                track->setActionSelected(actionIndex);
+                actionSelected = true;
+            }
         }
 
-        actionIndex = addActionBlockMenu(menuLabel, actionIndex, trackIndex, track, action);
-        if (blockWidth > ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x * 2.0f)
-            showBlockOptionButton(menuLabel, blockLabel);
+        { // Menu
+            actionIndex = addActionBlockMenu(menuLabel, actionIndex, trackIndex, track, action);
+            if (blockWidth > ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.x * 2.0f)
+                showBlockOptionButton(menuLabel, blockLabel);
+        }
 
-        showBetweenBlocksButtons(ImVec2(x, y + blockHeight / 2.f), actionIndex - 1, track, trackIndex);
+        { // Between blocks buttons
+            showBetweenBlocksButtons(ImVec2(x, y + blockHeight / 2.f), actionIndex - 1, track, trackIndex);
+        }
 
         ImGui::PopID();
 

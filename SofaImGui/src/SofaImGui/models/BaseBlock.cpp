@@ -21,81 +21,10 @@
  ******************************************************************************/
 #pragma once
 
-#include <sofa/defaulttype/RigidTypes.h>
-
 #include <SofaImGui/models/BaseBlock.h>
-#include <SofaImGui/config.h>
 
-#include <imgui.h>
-#include <imgui_internal.h>
-
-namespace sofaimgui::models {
-    class Track;
-}
-
-namespace sofaimgui::models::actions {
-
-class Action: public std::enable_shared_from_this< Action >, public BaseBlock
+namespace sofaimgui::models
 {
-    typedef sofa::defaulttype::RigidCoord<3, double> RigidCoord;
-
-   public:
-
-    typedef std::shared_ptr<Action> SPtr;
-
-    using BaseBlock::m_duration;
-
-    Action(const double& duration=DEFAULTDURATION):
-           BaseBlock(duration)
-    {
-       checkDuration();
-    }
-
-    virtual ~Action() = default;
-    
-    virtual bool apply(RigidCoord &/*position*/, const double &/*time*/){return false;}
-    virtual void computeDuration(){}
-    virtual void computeSpeed(){}
-
-    void setDuration(const double& duration) override
-    {
-        m_duration = duration;
-        checkDuration();
-        computeSpeed();
-    }
-
-    const double& getSpeed() {return m_speed;}
-    virtual void setSpeed(const double& speed)
-    {
-        m_speed = speed;
-        computeDuration();
-    }
-
-    void pushToTrack(std::shared_ptr<models::Track> track) override;
-    void insertInTrack(std::shared_ptr<models::Track> track, const sofa::Index &actionIndex) override;
-    void deleteFromTrack(std::shared_ptr<models::Track> track, const sofa::Index &actionIndex) override;
-    void swapWith(models::BaseBlock::SPtr action) override;
-
-   protected:
-
-    double m_minDuration{0.2};
-    double m_speed;
-
-    void checkDuration()
-    {
-        if (m_duration < m_minDuration)
-            m_duration = m_minDuration;
-    }
-
-    class ActionView: public BaseBlockView
-    {
-    };
-    ActionView view;
-
-   public :
-
-    ActionView* getView() override {return &view;}
-};
 
 } // namespace
 

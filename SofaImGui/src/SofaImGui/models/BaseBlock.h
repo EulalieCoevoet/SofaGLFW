@@ -22,79 +22,77 @@
 #pragma once
 
 #include <sofa/defaulttype/RigidTypes.h>
-
-#include <SofaImGui/models/BaseBlock.h>
 #include <SofaImGui/config.h>
-
 #include <imgui.h>
 #include <imgui_internal.h>
+#include <string>
 
 namespace sofaimgui::models {
     class Track;
 }
 
-namespace sofaimgui::models::actions {
+namespace sofaimgui::models {
 
-class Action: public std::enable_shared_from_this< Action >, public BaseBlock
+class BaseBlock
 {
-    typedef sofa::defaulttype::RigidCoord<3, double> RigidCoord;
-
    public:
 
-    typedef std::shared_ptr<Action> SPtr;
+    typedef std::shared_ptr<BaseBlock> SPtr;
 
-    using BaseBlock::m_duration;
+    inline static const int COMMENTSIZE = 18;
+    inline static const double DEFAULTDURATION = 1.;
 
-    Action(const double& duration=DEFAULTDURATION):
-           BaseBlock(duration)
+    BaseBlock(const double& duration=DEFAULTDURATION):
+        m_duration(duration)
     {
-       checkDuration();
     }
 
-    virtual ~Action() = default;
-    
-    virtual bool apply(RigidCoord &/*position*/, const double &/*time*/){return false;}
-    virtual void computeDuration(){}
-    virtual void computeSpeed(){}
+    virtual ~BaseBlock() = default;
+    virtual BaseBlock::SPtr duplicate() = 0;
 
-    void setDuration(const double& duration) override
-    {
-        m_duration = duration;
-        checkDuration();
-        computeSpeed();
-    }
+    const double& getDuration() {return m_duration;}
+    virtual void setDuration(const double& duration) {m_duration = duration;}
 
-    const double& getSpeed() {return m_speed;}
-    virtual void setSpeed(const double& speed)
-    {
-        m_speed = speed;
-        computeDuration();
-    }
+    virtual void pushToTrack(std::shared_ptr<models::Track> track) = 0;
+    virtual void insertInTrack(std::shared_ptr<models::Track> track, const sofa::Index &actionIndex) = 0;
+    virtual void deleteFromTrack(std::shared_ptr<models::Track> track, const sofa::Index &actionIndex) = 0;
+    virtual void swapWith(BaseBlock::SPtr action) = 0;
 
-    void pushToTrack(std::shared_ptr<models::Track> track) override;
-    void insertInTrack(std::shared_ptr<models::Track> track, const sofa::Index &actionIndex) override;
-    void deleteFromTrack(std::shared_ptr<models::Track> track, const sofa::Index &actionIndex) override;
-    void swapWith(models::BaseBlock::SPtr action) override;
+    void setComment(const char* comment) {strncpy(m_comment, comment, COMMENTSIZE); m_comment[COMMENTSIZE-1]='\0';}
+    void getComment(char* comment) {strncpy(comment, m_comment, COMMENTSIZE); comment[COMMENTSIZE-1]='\0';}
+
+    char* getComment() {return m_comment;}
 
    protected:
 
-    double m_minDuration{0.2};
-    double m_speed;
+    double m_duration;
+    char m_comment[COMMENTSIZE];
 
-    void checkDuration()
+    class BaseBlockView
     {
-        if (m_duration < m_minDuration)
-            m_duration = m_minDuration;
-    }
+       public:
+        bool showBlock(const std::string &label, const ImVec2 &size, const bool &isSelected=false)
+        {
+            SOFA_UNUSED(isSelected);
+            ImGuiWindow* window = ImGui::GetCurrentWindow();
+            float x = window->DC.CursorStartPos.x ;
+            float y = window->DC.CursorStartPos.y ;
 
-    class ActionView: public BaseBlockView
-    {
+            bool hasValuesChanged = showBlockInternal(label, size, isSelected);
+
+            window->DC.CursorStartPos.x = x;
+            window->DC.CursorStartPos.y = y;
+
+            return hasValuesChanged;
+        }
+       protected:
+        virtual bool showBlockInternal(const std::string &, const ImVec2 &, const bool & = false) {return false;}
     };
-    ActionView view;
+    BaseBlockView view;
 
    public :
 
-    ActionView* getView() override {return &view;}
+    virtual BaseBlockView* getView() {return &view;}
 };
 
 } // namespace

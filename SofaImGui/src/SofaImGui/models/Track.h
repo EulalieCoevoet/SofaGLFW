@@ -73,6 +73,8 @@ class Track
     bool canUngroup(const int& actionIndex);
     bool isInGroup(const int& actionIndex, bool strictly = false);
 
+    int getGroupLength(actions::Action::SPtr action) {return m_groups.contains(action)? m_groups[action]: 0;}
+
    protected:
 
     std::shared_ptr<actions::StartMove> m_startmove;
