@@ -61,12 +61,12 @@ protected:
     {
     public:
         CustomView(Custom &_custom) : custom(_custom) {}
-        bool showBlock(const std::string &label,
-                       const ImVec2 &size,
-                       const bool & = false) override;
 
     protected:
         Custom &custom;
+        bool showBlockInternal(const std::string &label,
+                               const ImVec2 &size,
+                               const bool & = false) override;
     };
     CustomView view;
 

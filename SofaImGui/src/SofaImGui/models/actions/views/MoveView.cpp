@@ -30,9 +30,9 @@
 
 namespace sofaimgui::models::actions {
 
-bool Move::MoveView::showBlock(const std::string &label,
-                               const ImVec2 &size,
-                               const bool & isSelected)
+bool Move::MoveView::showBlockInternal(const std::string &label,
+                                       const ImVec2 &size,
+                                       const bool & isSelected)
 {
     bool hasValuesChanged = false;
     ImGuiWindow* window = ImGui::GetCurrentWindow();

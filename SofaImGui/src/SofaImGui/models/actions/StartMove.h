@@ -84,12 +84,12 @@ class StartMove : public Action
     {
        public:
         StartMoveView(StartMove &_start) : start(_start) {}
-        bool showBlock(const std::string &label,
-                       const ImVec2 &size,
-                       const bool & = false) override;
 
        protected:
         StartMove &start;
+        bool showBlockInternal(const std::string &label,
+                               const ImVec2 &size,
+                               const bool & = false) override;
     };
     StartMoveView view;
 

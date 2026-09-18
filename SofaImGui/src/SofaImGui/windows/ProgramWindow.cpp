@@ -56,7 +56,7 @@ ProgramWindow::ProgramWindow(const std::string& name,
     : BaseWindow(name)
 {
     m_enabledWorkbenches = Workbench::LIVE_CONTROL | Workbench::SIMULATION_MODE;
-    m_windowFlags = ImGuiWindowFlags_AlwaysAutoResize;
+    m_windowFlags = ImGuiWindowFlags_AlwaysAutoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoScrollWithMouse;
     m_kinematicsGUIDataManager = kinematicsGUIDataManager;
 }
 
@@ -104,7 +104,7 @@ void ProgramWindow::internalShowWindow()
     if (isEnabledByState())
     {
         ProgramSizes().TrackMaxHeight = ImGui::GetFrameHeightWithSpacing() * 4.;
-        ProgramSizes().TrackMinHeight = ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.y * 2.;
+        ProgramSizes().TrackMinHeight = ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.y;
         static bool firstTime = true;
         if (firstTime)
         {
@@ -114,10 +114,11 @@ void ProgramWindow::internalShowWindow()
         ProgramSizes().InputWidth = ImGui::CalcTextSize("10000").x;
         ProgramSizes().AlignWidth = ImGui::CalcTextSize("iterations    ").x;
 
+        ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(ImGui::GetStyle().ItemSpacing.x, ImGui::GetStyle().ItemSpacing.y * 0.5));
         showProgramButtons();
 
         float width = ImGui::GetWindowWidth();
-        float height = ImGui::GetWindowHeight() - ImGui::GetTextLineHeightWithSpacing() * 3.;
+        float height = ImGui::GetContentRegionAvail().y;
         static const float defaultZoomCoef = 6.5;
         static float zoomCoef = defaultZoomCoef;
         static float minSize = ImGui::GetFrameHeight() * 1.5;
@@ -125,12 +126,13 @@ void ProgramWindow::internalShowWindow()
         ProgramSizes().StartMoveBlockSize = defaultZoomCoef * minSize;
 
         ImGui::PushStyleColor(ImGuiCol_FrameBg, ImGui::GetColorU32(ImGuiCol_WindowBg));
+        ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
         if (ImGui::BeginChild("Timeline", ImVec2(width, height), ImGuiChildFlags_FrameStyle, ImGuiWindowFlags_AlwaysHorizontalScrollbar))
         {
             ImGui::PopStyleColor();
+            ImGui::PopStyleVar(2);
 
-            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(6, 6));
-
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(ImGui::GetStyle().ItemSpacing.x, 0.));
             if (m_ws_timeBasedDisplay)
                 showTimeline();
             else // Keep the space the timeline would have taken, empty
@@ -138,17 +140,19 @@ void ProgramWindow::internalShowWindow()
                 ImGui::NewLine();
                 ImGui::NewLine();
             }
+            ImGui::PopStyleVar();
 
+            ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(6, 6));
             int nbCollaspedTracks = showTracks();
+            ImGui::PopStyleVar();
 
             if (m_ws_timeBasedDisplay)
                 showCursorMarker(nbCollaspedTracks);
-
-            ImGui::PopStyleVar();
         }
         else
         {
             ImGui::PopStyleColor();
+            ImGui::PopStyleVar(2);
         }
         ImGui::EndChild();
 
@@ -172,7 +176,7 @@ void ProgramWindow::internalShowWindow()
 
 void ProgramWindow::showProgramButtons()
 {
-    auto positionRight = ImGui::GetCursorPosX() + ImGui::GetWindowSize().x - ImGui::GetFrameHeight() * 4 - ImGui::GetStyle().ItemSpacing.y * 5.5; // Get position for right buttons
+    auto positionRight = ImGui::GetCursorPosX() + ImGui::GetWindowSize().x - ImGui::GetFrameHeight() * 4 - ImGui::GetStyle().ItemSpacing.x * 5.5; // Get position for right buttons
     auto positionMiddle = ImGui::GetCursorPosX() + ImGui::GetWindowSize().x / 2.f; // Get position for middle button
 
             // Left buttons
@@ -263,8 +267,6 @@ void ProgramWindow::showCursorMarker(const int& nbCollaspedTracks)
     double max = ImGui::GetWindowWidth() + ImGui::GetScrollX();
     ImRect grab_bb(ImVec2(m_trackBeginPos.x + m_cursorPos - widthTri / 2., m_trackBeginPos.y - widthTri),
                    ImVec2(m_trackBeginPos.x + m_cursorPos + widthTri / 2., m_trackBeginPos.y));
-    const ImRect frame_bb(ImVec2(m_trackBeginPos.x - widthTri / 2., m_trackBeginPos.y - widthTri),
-                          ImVec2(m_trackBeginPos.x + max, m_trackBeginPos.y));
 
     ImVec2 p0Rect(grab_bb.Min.x + widthTri / 2., grab_bb.Min.y);
     ImVec2 p1Rect(p0Rect.x + thicknessRect,
@@ -273,6 +275,9 @@ void ProgramWindow::showCursorMarker(const int& nbCollaspedTracks)
     ImVec2 p0Tri(p0Rect.x + thicknessRect / 2.f, grab_bb.Max.y);
     ImVec2 p1Tri(p0Tri.x - widthTri / 2.f, p0Tri.y - widthTri);
     ImVec2 p2Tri(p0Tri.x + widthTri / 2.f,  p0Tri.y - widthTri);
+
+    ImRect frame_bb(ImVec2(m_trackBeginPos.x - widthTri / 2., p0Rect.y),
+                    ImVec2(m_trackBeginPos.x + max, p1Rect.y));
 
     ImGui::ItemSize(ImVec2(widthTri, widthTri));
     const ImGuiID id = ImGui::GetID("##cursormarker");
@@ -295,6 +300,7 @@ void ProgramWindow::showCursorMarker(const int& nbCollaspedTracks)
     }
 
     ImGuiContext& g = *GImGui;
+    frame_bb.Max.y = m_trackBeginPos.y;
     const bool hovered = ImGui::ItemHoverable(frame_bb, id, g.LastItemData.ItemFlags);
     const bool clicked = hovered && ImGui::IsMouseClicked(ImGuiMouseButton_Left, ImGuiInputFlags_None, id);
     const bool make_active = (clicked || g.NavActivateId == id);
@@ -331,12 +337,6 @@ void ProgramWindow::showTimeline()
     int nbSteps = width / ProgramSizes().TimelineOneSecondSize + 1;
 
     ImGuiWindow* window = ImGui::GetCurrentWindow();
-    const ImRect frame_bb(ImVec2(m_trackBeginPos.x, m_trackBeginPos.y - ImGui::GetFrameHeight() * 1.5),
-                          ImVec2(m_trackBeginPos.x + width, m_trackBeginPos.y));
-    const ImGuiID id = ImGui::GetID("##timeline");
-    if (!ImGui::ItemAdd(frame_bb, id))
-        return;
-    ImGui::SetItemTooltip("Simulation time");
     window->DC.CursorPos.x = m_trackBeginPos.x;
 
     ImGui::BeginGroup(); // Timeline's number (seconds)
@@ -350,6 +350,7 @@ void ProgramWindow::showTimeline()
         ImGui::PopStyleVar();
     }
     ImGui::EndGroup();
+    ImGui::SetItemTooltip("Simulation time");
 
     ImDrawList* drawList = ImGui::GetWindowDrawList();
 
@@ -744,7 +745,7 @@ void ProgramWindow::showBlockOptionButton(const std::string &menulabel, const st
     ImVec2 buttonSize(ysize, ysize);
     window->DC.CursorPos = window->DC.CursorPosPrevLine;
     window->DC.CursorPos.x -= buttonSize.x + ImGui::GetStyle().FramePadding.x;
-    window->DC.CursorPos.y += ImGui::GetStyle().FramePadding.y;
+    window->DC.CursorPos.y += ImGui::GetStyle().FramePadding.y * 0.5;
     ImGui::PushStyleColor(ImGuiCol_Button, COLOR_TRANSPARENT);
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImVec4(1.0f, 1.0f, 1.0f, 0.05f));
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, COLOR_TRANSPARENT);

@@ -6,7 +6,7 @@
 #include <SofaImGui/widgets/ProgramWidget.h>
 #include <SofaImGui/models/actions/Action.h>
 #include <ProgramStyle.h>
-
+#define IMGUI_DEFINE_MATH_OPERATORS // import math operators
 
 namespace sofaimgui::widgets
 {
@@ -41,6 +41,8 @@ void BlockBackground(const char* label, const ImRect &bb, const ImVec4 &color, c
 
     { // Header background
         ImVec2 padding(ImGui::GetStyle().FramePadding);
+        padding.x*=0.5;
+        padding.y*=0.5;
         if (bb.Min.x + padding.x < bb.Max.x - padding.x)
         {
             drawList->AddRectFilled(ImVec2(bb.Min.x + padding.x, bb.Min.y + padding.y),
@@ -100,7 +102,7 @@ void BlockHeader(const char* icon, char* label, bool& hasValuesChanged)
     ImGui::PushStyleColor(ImGuiCol_Text, ProgramColors().Text);
     { // Header
         x += padding.y * 3;
-        y += padding.y;
+        y += padding.y * 0.5;
 
         window->DC.CursorPos.x = x;
         window->DC.CursorPos.y = y;

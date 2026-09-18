@@ -24,6 +24,7 @@
 #include <sofa/defaulttype/RigidTypes.h>
 #include <SofaImGui/config.h>
 #include <imgui.h>
+#include <imgui_internal.h>
 #include <string>
 
 namespace sofaimgui::models {
@@ -97,7 +98,22 @@ class Action: public std::enable_shared_from_this< Action >
     class ActionView
     {
        public:
-        virtual bool showBlock(const std::string &, const ImVec2 &, const bool & = false) {return false;}
+        bool showBlock(const std::string &label, const ImVec2 &size, const bool &isSelected=false)
+        {
+            SOFA_UNUSED(isSelected);
+            ImGuiWindow* window = ImGui::GetCurrentWindow();
+            float x = window->DC.CursorStartPos.x ;
+            float y = window->DC.CursorStartPos.y ;
+
+            bool hasValuesChanged = showBlockInternal(label, size, false);
+
+            window->DC.CursorStartPos.x = x;
+            window->DC.CursorStartPos.y = y;
+
+            return hasValuesChanged;
+        }
+       protected:
+        virtual bool showBlockInternal(const std::string &, const ImVec2 &, const bool & = false) {return false;}
     };
     ActionView view;
 

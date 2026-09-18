@@ -33,9 +33,9 @@
 
 namespace sofaimgui::models::actions {
 
-bool Pick::PickView::showBlock(const std::string &label,
-                               const ImVec2 &size,
-                               const bool & isSelected)
+bool Pick::PickView::showBlockInternal(const std::string &label,
+                                       const ImVec2 &size,
+                                       const bool & isSelected)
 {
     bool hasValuesChanged = false;
     ImGuiWindow* window = ImGui::GetCurrentWindow();

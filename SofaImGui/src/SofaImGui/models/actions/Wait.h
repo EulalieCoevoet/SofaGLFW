@@ -46,12 +46,12 @@ class Wait : public Action
     {
        public:
         WaitView(Wait &_wait) : wait(_wait) {}
-        bool showBlock(const std::string &label,
-                       const ImVec2 &size,
-                       const bool & = false) override;
 
        protected:
         Wait &wait;
+        bool showBlockInternal(const std::string &label,
+                               const ImVec2 &size,
+                               const bool & = false) override;
     };
     WaitView view;
 

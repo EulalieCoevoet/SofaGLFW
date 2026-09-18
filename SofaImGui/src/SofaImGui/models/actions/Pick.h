@@ -66,12 +66,12 @@ class SOFAIMGUI_API Pick : public Action
     {
        public:
         PickView(Pick &_pick) : pick(_pick) {}
-        bool showBlock(const std::string &label,
-                       const ImVec2 &size,
-                       const bool & = false) override;
 
        protected:
         Pick &pick;
+        bool showBlockInternal(const std::string &label,
+                               const ImVec2 &size,
+                               const bool & = false) override;
     };
     PickView view;
 
