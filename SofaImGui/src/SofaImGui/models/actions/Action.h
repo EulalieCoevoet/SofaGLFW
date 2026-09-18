@@ -105,7 +105,7 @@ class Action: public std::enable_shared_from_this< Action >
             float x = window->DC.CursorStartPos.x ;
             float y = window->DC.CursorStartPos.y ;
 
-            bool hasValuesChanged = showBlockInternal(label, size, false);
+            bool hasValuesChanged = showBlockInternal(label, size, isSelected);
 
             window->DC.CursorStartPos.x = x;
             window->DC.CursorStartPos.y = y;

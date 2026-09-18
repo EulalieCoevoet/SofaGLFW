@@ -103,8 +103,9 @@ void ProgramWindow::internalShowWindow()
 {
     if (isEnabledByState())
     {
-        ProgramSizes().TrackMaxHeight = ImGui::GetFrameHeightWithSpacing() * 4.;
-        ProgramSizes().TrackMinHeight = ImGui::GetFrameHeight() + ImGui::GetStyle().FramePadding.y;
+        ProgramSizes().BlockHeaderHeight = ImGui::GetStyle().FramePadding.y + ImGui::GetFrameHeight();
+        ProgramSizes().TrackMaxHeight = ImGui::GetFrameHeightWithSpacing() * 3 + ProgramSizes().BlockHeaderHeight * 2;
+        ProgramSizes().TrackMinHeight = ProgramSizes().BlockHeaderHeight * 2;
         static bool firstTime = true;
         if (firstTime)
         {
@@ -274,7 +275,7 @@ void ProgramWindow::showCursorMarker(const int& nbCollaspedTracks)
 
     ImVec2 p0Tri(p0Rect.x + thicknessRect / 2.f, grab_bb.Max.y);
     ImVec2 p1Tri(p0Tri.x - widthTri / 2.f, p0Tri.y - widthTri);
-    ImVec2 p2Tri(p0Tri.x + widthTri / 2.f,  p0Tri.y - widthTri);
+    ImVec2 p2Tri(p0Tri.x + widthTri / 2.f, p0Tri.y - widthTri);
 
     ImRect frame_bb(ImVec2(m_trackBeginPos.x - widthTri / 2., p0Rect.y),
                     ImVec2(m_trackBeginPos.x + max, p1Rect.y));
@@ -415,7 +416,11 @@ int ProgramWindow::showTracks()
                 ImGui::GetCurrentWindow()->DC.CursorPosPrevLine.x += ProgramSizes().StartMoveBlockSize + ImGui::GetStyle().ItemSpacing.x;
             }
 
-            showBlocks(track, trackIndex);
+            float blockHeight = ProgramSizes().TrackHeight - ProgramSizes().BlockHeaderHeight;
+
+            { // Show blocks
+                showBlocks(track, trackIndex);
+            }
 
             float x = ImGui::GetCurrentWindow()->DC.CursorPosPrevLine.x ;
             float y = ImGui::GetCurrentWindow()->DC.CursorPosPrevLine.y ;
@@ -423,7 +428,7 @@ int ProgramWindow::showTracks()
             { // Empty track background
                 ImGui::SameLine();
                 std::string trackLabel = "##Track" + std::to_string(trackIndex) + "Empty";
-                ImVec2 size(ImGui::GetWindowWidth() + ImGui::GetScrollX(), ProgramSizes().TrackHeight);
+                ImVec2 size(ImGui::GetWindowWidth() + ImGui::GetScrollX(), blockHeight);
 
                 float x = ImGui::GetCurrentWindow()->DC.CursorPos.x ;
                 float y = ImGui::GetCurrentWindow()->DC.CursorPos.y ;
@@ -439,8 +444,10 @@ int ProgramWindow::showTracks()
                 }
             }
 
-            const std::vector<models::actions::Action::SPtr> &actions = track->getActions();
-            showBetweenBlocksButtons(ImVec2(x + ImGui::GetStyle().ItemSpacing.x, y + ProgramSizes().TrackHeight / 2.f), actions.size(), track, trackIndex);
+            { // Show between blocks button
+                const std::vector<models::actions::Action::SPtr> &actions = track->getActions();
+                showBetweenBlocksButtons(ImVec2(x + ImGui::GetStyle().ItemSpacing.x, y + blockHeight / 2.f), actions.size(), track, trackIndex);
+            }
 
             trackIndex++;
 
@@ -500,8 +507,7 @@ bool ProgramWindow::showTrackButtons(const int &trackIndex, const char* const me
     ImGui::PushStyleColor(ImGuiCol_ButtonHovered, ImGui::GetColorU32(ImGuiCol_Header)); // Color of track button
     ImGui::PushStyleColor(ImGuiCol_ButtonActive, ImGui::GetColorU32(ImGuiCol_Header)); // Color of track button
 
-    if (!collapsed || ProgramSizes().TrackHeight > ProgramSizes().TrackMinHeight) // hide the button at the end of the collapsing animation
-    {
+    { // Option button
         std::string optionlabel = ICON_FA_BARS"##TrackOption" + std::to_string(trackIndex);
         if(ImGui::Button(optionlabel.c_str(), ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight())))
         {
@@ -510,21 +516,25 @@ bool ProgramWindow::showTrackButtons(const int &trackIndex, const char* const me
     }
 
     window->DC.CursorPos.x = x;
-    window->DC.CursorPos.y = y + (collapsed? (ProgramSizes().TrackHeight - ImGui::GetFrameHeight()) / 2.f :
-                                      ProgramSizes().TrackHeight - ImGui::GetFrameHeightWithSpacing()) ;
+    window->DC.CursorPos.y = y + ProgramSizes().TrackHeight - ImGui::GetFrameHeightWithSpacing();
     ImGui::PushStyleVar(ImGuiStyleVar_ButtonTextAlign, ImVec2(0.5, 1)); // Align icon down middle
 
     std::string collapselabel = "##TrackCollapse" + std::to_string(trackIndex);
     std::vector<std::string> icons{ICON_FA_COMPRESS, ICON_FA_EXPAND};
     static std::string icon = icons[collapsed];
-    ImGui::Button((icon + collapselabel).c_str(), ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight()));
-    ImGui::SetItemTooltip(collapsed? "Expend track": "Collapse track");
 
-    if (ImGui::IsItemClicked())
-        collapsed = !collapsed;
+    { // Collapse button
+        ImGui::Button((icon + collapselabel).c_str(), ImVec2(ImGui::GetFrameHeight(), ImGui::GetFrameHeight()));
+        ImGui::SetItemTooltip(collapsed? "Expend track": "Collapse track");
 
-    ImGui::SameLine(0, 0);
-    showTrackName(trackIndex);
+        if (ImGui::IsItemClicked())
+            collapsed = !collapsed;
+    }
+
+    { // Track Name
+        ImGui::SameLine(0, 0);
+        showTrackName(trackIndex);
+    }
 
     // Animate collapse
     ImGuiContext& g = *GImGui;
@@ -549,7 +559,7 @@ bool ProgramWindow::showTrackButtons(const int &trackIndex, const char* const me
 
 void ProgramWindow::showBlocks(models::Track::SPtr track, const int& trackIndex)
 {
-    float blockHeight = ProgramSizes().TrackHeight;
+    float blockHeight = ProgramSizes().TrackHeight - ProgramSizes().BlockHeaderHeight;
 
     if (m_kinematicsGUIDataManager->hasInverseProblemSolverAndTCP() && trackIndex == 0)
         showStartMoveBlock(blockHeight, trackIndex, track);
@@ -1166,7 +1176,7 @@ sofa::Index ProgramWindow::addTrackMenu(const std::string& menuLabel, const sofa
         {
             track->clear();
         }
-        if (ImGui::MenuItem(("Add track##" + std::to_string(index)).c_str(), nullptr, false))
+        if (ImGui::MenuItem(("Add track after##" + std::to_string(index)).c_str(), nullptr, false))
         {
             m_program.addTrack(std::make_shared<models::Track>(m_kinematicsGUIDataManager), index+1);
         }

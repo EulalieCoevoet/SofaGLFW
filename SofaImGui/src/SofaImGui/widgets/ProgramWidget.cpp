@@ -8,6 +8,8 @@
 #include <ProgramStyle.h>
 #define IMGUI_DEFINE_MATH_OPERATORS // import math operators
 
+#include <imgui_internal.h>
+
 namespace sofaimgui::widgets
 {
 
