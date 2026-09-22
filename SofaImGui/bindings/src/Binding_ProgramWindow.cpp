@@ -69,7 +69,7 @@ void moduleAddProgramWindow(py::module &m)
         {
             if (engine)
             {
-                engine->m_programWindow.setProgramFilename(filename);
+                engine->m_programWindow.saveProgramDirAndFilename(filename);
             }
         }, "Set the program filename to import."
         );
@@ -79,7 +79,7 @@ void moduleAddProgramWindow(py::module &m)
         {
             if (engine)
             {
-                engine->m_programWindow.setProgramFilename(filename);
+                engine->m_programWindow.saveProgramDirAndFilename(filename);
             }
             msg_deprecated(m_a_name) << "Use setProgramFilename() instead.";
         }, "[DEPRECATED] Use setProgramFilename() instead."

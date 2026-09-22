@@ -20,13 +20,14 @@
  * Contact information: contact@sofa-framework.org                             *
  ******************************************************************************/
 
-#include "GUIColors.h"
-#include "IconsFontAwesome6.h"
-#include <SofaImGui/models/modifiers/Repeat.h>
+#include <GUIColors.h>
+#include <IconsFontAwesome6.h>
 #include <imgui.h>
 #include <imgui_internal.h>
+
 #include <ProgramStyle.h>
-#include <SofaImGui/widgets/Widgets.h>
+#include <SofaImGui/widgets/ProgramWidget.h>
+#include <SofaImGui/models/modifiers/Repeat.h>
 
 
 namespace sofaimgui::models::modifiers {
