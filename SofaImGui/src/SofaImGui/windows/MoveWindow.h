@@ -60,6 +60,7 @@ class SOFAIMGUI_API MoveWindow : public BaseWindow
 
     sofaimgui::widgets::MovePad m_movePad;
 
+    void onEndSimulationLoad() override;
     void internalShowWindow() override;
 
     bool isEnabledByState() override {return m_kinematicsGUIDataManager->hasInverseProblemSolverAndTCP() || m_kinematicsGUIDataManager->hasActuator();}
