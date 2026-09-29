@@ -21,58 +21,51 @@
  ******************************************************************************/
 #pragma once
 
-#include <SofaImGui/windows/BaseWindow.h>
-#include <SofaImGui/models/guidata/KinematicsGUIDataManager.h>
-#include <SofaImGui/widgets/MovePad.h>
-#include <SofaImGui/DrivingWindow.h>
+#include <SofaImGui/models/BaseBlock.h>
+#include <SofaImGui/config.h>
+
 #include <imgui.h>
+#include <imgui_internal.h>
 
-namespace sofaimgui::windows {
+namespace sofaimgui::models {
+class Track;
+}
 
-class SOFAIMGUI_API MoveWindow : public BaseWindow
+namespace sofaimgui::models {
+
+class Group: public std::enable_shared_from_this< Group >, public BaseBlock
 {
-   public:
-    MoveWindow(const std::string& name, models::guidata::KinematicsGUIDataManager::SPtr kinematicsGUIDataManager);
-    ~MoveWindow() = default;
+    typedef sofa::defaulttype::RigidCoord<3, double> RigidCoord;
 
-    std::string getDescription() override;
+public:
 
-    enum MoveType {
-        PAD,
-        SLIDERS
+    typedef std::shared_ptr<Group> SPtr;
+
+    using BaseBlock::m_duration;
+
+    Group(const double& duration):
+        BaseBlock(duration)
+    {
+    }
+
+    virtual ~Group() = default;
+
+    void setLength(const double &length) {m_length=length;}
+    double getLength() {return m_length;}
+
+protected:
+    float m_length;
+
+    class GroupView: public BaseBlockView
+    {
     };
-    MoveType m_moveType;
+    GroupView view;
 
-   protected:
+public :
 
-    models::guidata::KinematicsGUIDataManager::SPtr m_kinematicsGUIDataManager{nullptr};
-
-    double m_x;
-    double m_y;
-    double m_z;
-    double m_rx;
-    double m_ry;
-    double m_rz;
-    
-    bool m_freeRoll{true};
-    bool m_freePitch{true};
-    bool m_freeYaw{true};
-
-    sofaimgui::widgets::MovePad m_movePad;
-
-    void onEndSimulationLoad() override;
-    void internalShowWindow() override;
-
-    bool isEnabledByState() override {return m_kinematicsGUIDataManager->hasInverseProblemSolverAndTCP() || m_kinematicsGUIDataManager->hasActuator();}
-
-    bool showSliderDouble(const char *name, const char* label1, const char *label2, double* v, const double& min, const double& max, const ImU32 &color);
-    void showOptions();
-    void showWeightOption(const int &index);
-    void showPad();
-    bool showVerticalTab(const std::string& label, const std::string& tooltip, const bool &active);
-    bool isDrivingSimulation() {return drivingWindow == DrivingWindow::MOVE;}
+    GroupView* getView() override {return &view;}
 };
 
-}
+} // namespace
 
 

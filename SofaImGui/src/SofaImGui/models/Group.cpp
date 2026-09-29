@@ -21,58 +21,12 @@
  ******************************************************************************/
 #pragma once
 
-#include <SofaImGui/windows/BaseWindow.h>
-#include <SofaImGui/models/guidata/KinematicsGUIDataManager.h>
-#include <SofaImGui/widgets/MovePad.h>
-#include <SofaImGui/DrivingWindow.h>
-#include <imgui.h>
+#include <SofaImGui/models/Group.h>
+#include <SofaImGui/models/Track.h>
 
-namespace sofaimgui::windows {
-
-class SOFAIMGUI_API MoveWindow : public BaseWindow
+namespace sofaimgui::models
 {
-   public:
-    MoveWindow(const std::string& name, models::guidata::KinematicsGUIDataManager::SPtr kinematicsGUIDataManager);
-    ~MoveWindow() = default;
 
-    std::string getDescription() override;
-
-    enum MoveType {
-        PAD,
-        SLIDERS
-    };
-    MoveType m_moveType;
-
-   protected:
-
-    models::guidata::KinematicsGUIDataManager::SPtr m_kinematicsGUIDataManager{nullptr};
-
-    double m_x;
-    double m_y;
-    double m_z;
-    double m_rx;
-    double m_ry;
-    double m_rz;
-    
-    bool m_freeRoll{true};
-    bool m_freePitch{true};
-    bool m_freeYaw{true};
-
-    sofaimgui::widgets::MovePad m_movePad;
-
-    void onEndSimulationLoad() override;
-    void internalShowWindow() override;
-
-    bool isEnabledByState() override {return m_kinematicsGUIDataManager->hasInverseProblemSolverAndTCP() || m_kinematicsGUIDataManager->hasActuator();}
-
-    bool showSliderDouble(const char *name, const char* label1, const char *label2, double* v, const double& min, const double& max, const ImU32 &color);
-    void showOptions();
-    void showWeightOption(const int &index);
-    void showPad();
-    bool showVerticalTab(const std::string& label, const std::string& tooltip, const bool &active);
-    bool isDrivingSimulation() {return drivingWindow == DrivingWindow::MOVE;}
-};
-
-}
+} // namespace
 
 
