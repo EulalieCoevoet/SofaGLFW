@@ -908,7 +908,7 @@ void SceneGraphWindow::addGroupTab(const std::map<std::string, std::vector<sofa:
 
                     if (data->getParent())
                     {
-                        const auto linkPath = data->getLinkPath();
+                        const auto linkPath = data->getParent()->getLinkPath();
                         if (!linkPath.empty())
                         {
                             ImGui::TextWrapped("%s", linkPath.c_str());
