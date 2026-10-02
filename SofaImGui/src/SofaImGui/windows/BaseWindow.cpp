@@ -39,8 +39,6 @@ BaseWindow::BaseWindow(std::string name)
 
 void BaseWindow::onEndSimulationLoad()
 {
-    m_GUIData.clear();
-    m_groupedGUIData.clear();
     registerAndLoadGUIDataWindowSettings();
 }
 
