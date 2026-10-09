@@ -32,6 +32,7 @@ public:
     DashboardWindow(const std::string& name);
     ~DashboardWindow() = default;
 
+    void onBeginSimulationLoad() override;
     std::string getDescription() override;
 
 protected:
@@ -39,7 +40,6 @@ protected:
     bool m_expandAll{false};
     bool m_collapseAll{false};
 
-    void onBeginSimulationLoad() override;
     void internalShowWindow() override;
 
     void showWidget(models::guidata::GUIData::SPtr data);

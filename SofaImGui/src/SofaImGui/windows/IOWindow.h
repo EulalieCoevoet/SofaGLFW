@@ -134,6 +134,8 @@ class SOFAIMGUI_API IOWindow : public BaseWindow
     typedef typename sofa::defaulttype::RigidCoord<3, double> RigidCoord;
 
     std::string getDescription() override;
+
+    void onBeginSimulationLoad() override;
     void onEndSimulationLoad() override;
 
     void animateBeginEvent(sofa::simulation::Node *groot);
@@ -156,8 +158,6 @@ class SOFAIMGUI_API IOWindow : public BaseWindow
     bool m_isReadyToPublish;
     bool m_isPublishing;
     bool m_isListening;
-
-    void onBeginSimulationLoad() override;
 
     void internalShowWindow() override;
 

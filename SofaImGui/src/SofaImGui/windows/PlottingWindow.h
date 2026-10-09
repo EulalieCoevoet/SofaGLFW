@@ -70,6 +70,8 @@ class SOFAIMGUI_API PlottingWindow : public BaseWindow
     ~PlottingWindow() = default;
 
     std::string getDescription() override;
+    void onBeginSimulationLoad() override;
+    bool isEnabledByState() override {return !m_GUIData.empty();}
 
     sofaimgui::models::guidata::GUIData::SPtr addData(const std::string& label,
                                                       const std::pair<sofa::core::BaseData*, bool>& data,
@@ -88,9 +90,6 @@ class SOFAIMGUI_API PlottingWindow : public BaseWindow
     void beforeShowWindow() override;
     void internalShowWindow() override;
     void registerAndLoadWindowSettings() override;
-
-    void onBeginSimulationLoad() override;
-    bool isEnabledByState() override {return !m_GUIData.empty();}
 
     void exportData();
     void setDataSubplot(models::guidata::GUIData::SPtr data, const int& subplotIndex);

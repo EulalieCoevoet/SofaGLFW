@@ -48,6 +48,7 @@ class SOFAIMGUI_API ProgramWindow : public BaseWindow
     std::string getDescription() override;
     void onBeginSimulationLoad() override;
     void onEndSimulationLoad() override;
+    bool isEnabledByState() override {return m_program.isValid();}
 
     void animateBeginEvent(sofa::simulation::Node *groot);
     void animateEndEvent(sofa::simulation::Node *groot);
@@ -81,8 +82,6 @@ class SOFAIMGUI_API ProgramWindow : public BaseWindow
 
     void internalShowWindow() override;
     void registerAndLoadWindowSettings() override;
-
-    bool isEnabledByState() override {return m_program.isValid();}
 
     void showProgramButtons(); /// The buttons of the program window (import, export, restart, repeat, etc.).
     void showCursorMarker(const int &nbCollaspedTracks); /// The red cursor marker.
