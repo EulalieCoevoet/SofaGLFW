@@ -66,6 +66,7 @@ void LogWindow::registerAndLoadWindowSettings()
 {
     registerAndLoadWindowSetting(WS_LOG_AUTOSCROLL, m_ws_autoScroll, WindowsSettings::BOOL);
     registerAndLoadWindowSetting(WS_LOG_SHOWINFO, m_ws_showInfo, WindowsSettings::BOOL);
+    registerAndLoadWindowSetting(WS_LOG_WRAPTEXT, m_ws_wrapText, WindowsSettings::BOOL);
 }
 
 void LogWindow::internalShowWindow()
@@ -91,6 +92,12 @@ void LogWindow::showButtons()
     ImGui::SameLine();
 
     showClearButton();
+
+    ImGui::SameLine();
+    ImGui::SeparatorEx(ImGuiSeparatorFlags_Vertical);
+    ImGui::SameLine();
+
+    showFilterButton();
 }
 
 void LogWindow::showSettingsButton()
@@ -102,8 +109,28 @@ void LogWindow::showSettingsButton()
     {
         sofaimgui::widgets::CheckBox("Automatic scroll", &m_ws_autoScroll);
         sofaimgui::widgets::CheckBox("Show info", &m_ws_showInfo);
+        sofaimgui::widgets::CheckBox("Wrap text", &m_ws_wrapText);
         ImGui::EndPopup();
     }
+}
+
+void LogWindow::showFilterButton()
+{
+    ImGui::PushStyleColor(ImGuiCol_ButtonText, COLOR_RED);
+    sofaimgui::widgets::PushButton(ICON_FA_CIRCLE_EXCLAMATION, &m_showOnlyErrors);
+    if (m_showOnlyErrors)
+        m_showOnlyWarnings = false;
+    ImGui::SetItemTooltip("Show only errors");
+    ImGui::PopStyleColor();
+
+    ImGui::SameLine();
+
+    ImGui::PushStyleColor(ImGuiCol_ButtonText, COLOR_ORANGE);
+    sofaimgui::widgets::PushButton(ICON_FA_TRIANGLE_EXCLAMATION, &m_showOnlyWarnings);
+    if (m_showOnlyWarnings)
+        m_showOnlyErrors = false;
+    ImGui::SetItemTooltip("Show only warnings");
+    ImGui::PopStyleColor();
 }
 
 void LogWindow::showExportButton()
@@ -165,7 +192,11 @@ void LogWindow::showLogs()
     }();
 
     std::size_t nbRows = 0;
-    if (ImGui::BeginTable("logTable", 4, ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_ScrollY))
+    ImGuiTableFlags tableFlags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_ScrollY;
+    if (!m_ws_wrapText)
+        tableFlags |= ImGuiTableFlags_ScrollX ;
+
+    if (ImGui::BeginTable("logTable", 4, tableFlags))
     {
         static std::string messageToCopy;
         bool openMessageContextMenu = false;
@@ -173,14 +204,18 @@ void LogWindow::showLogs()
         ImGui::TableSetupColumn("logId", ImGuiTableColumnFlags_WidthFixed);
         ImGui::TableSetupColumn("message type", ImGuiTableColumnFlags_WidthFixed);
         ImGui::TableSetupColumn("sender", ImGuiTableColumnFlags_WidthFixed);
-        ImGui::TableSetupColumn("message", ImGuiTableColumnFlags_WidthStretch);
+        ImGui::TableSetupColumn("message", m_ws_wrapText? ImGuiTableColumnFlags_WidthStretch: ImGuiTableColumnFlags_WidthFixed);
         for (sofa::Index index = m_firstMessageIndex; index<m_messages.size(); index++)
         {
             const auto& message = m_messages[index];
             if (!m_ws_showInfo && message.type() == sofa::helper::logging::Message::Info)
-            {
                 continue;
-            }
+
+            if (m_showOnlyWarnings && message.type() != sofa::helper::logging::Message::Warning)
+                continue;
+
+            if (m_showOnlyErrors && message.type() != sofa::helper::logging::Message::Error)
+                continue;
 
             ImGui::TableNextRow();
             nbRows++;
@@ -229,7 +264,12 @@ void LogWindow::showLogs()
 
             ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 0));
             ImGui::PushStyleColor(ImGuiCol_FrameBg, COLOR_TRANSPARENT);
-            ImGui::TextWrapped("%s", msgStr.c_str());
+
+            if (m_ws_wrapText)
+                ImGui::TextWrapped("%s", msgStr.c_str());
+            else
+                ImGui::Text("%s", msgStr.c_str());
+
             if (ImGui::IsItemClicked(ImGuiMouseButton_Right))
             {
                 openMessageContextMenu = true;

@@ -46,6 +46,10 @@ namespace sofaimgui::windows
 
         bool m_ws_autoScroll{true};
         bool m_ws_showInfo{true};
+        bool m_ws_wrapText{true};
+
+        bool m_showOnlyErrors{false};
+        bool m_showOnlyWarnings{false};
 
         sofa::Index m_firstMessageIndex{0};
 
@@ -54,6 +58,7 @@ namespace sofaimgui::windows
 
         void showButtons();
         void showSettingsButton();
+        void showFilterButton();
         void showExportButton();
         void showCopyLogButton();
         void showClearButton();
