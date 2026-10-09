@@ -176,23 +176,6 @@ bool ImGuiGUIEngine::loadProject()
     return false;
 }
 
-void ImGuiGUIEngine::clearWindows()
-{
-    m_kinematicsGUIDataManager->clear();
-    for (auto& window : m_windows)
-        window.get().clearWindow();
-    for (auto& window : m_modalWindows)
-        window.get().clearWindow();
-}
-
-void ImGuiGUIEngine::clearWindowsGUIData()
-{
-    for (auto& window : m_windows)
-        window.get().clearGUIData();
-    for (auto& window : m_modalWindows)
-        window.get().clearGUIData();
-}
-
 void ImGuiGUIEngine::setWindowsBaseGUI(sofaglfw::SofaGLFWBaseGUI* baseGUI)
 {
     m_kinematicsGUIDataManager->setBaseGUI(baseGUI);
@@ -201,6 +184,16 @@ void ImGuiGUIEngine::setWindowsBaseGUI(sofaglfw::SofaGLFWBaseGUI* baseGUI)
     for (auto& window : m_modalWindows)
         window.get().setBaseGUI(baseGUI);
 }
+
+void ImGuiGUIEngine::notifyWindowsBeginSimulationLoad()
+{
+    m_kinematicsGUIDataManager->clear();
+    for (auto& window : m_windows)
+        window.get().onBeginSimulationLoad();
+    for (auto& window : m_modalWindows)
+        window.get().onBeginSimulationLoad();
+}
+
 
 void ImGuiGUIEngine::notifyWindowsEndSimulationLoad()
 {
@@ -1059,9 +1052,7 @@ void ImGuiGUIEngine::key_callback(GLFWwindow* window, int key, int scancode, int
 
 void ImGuiGUIEngine::loadSimulation(const bool& reload, const std::string& filename)
 {
-    clearWindows();
-    if (!reload) // When we reload the simulation, reset the GUI data without deleting them
-        clearWindowsGUIData();
+    notifyWindowsBeginSimulationLoad();
 
     sofa::simulation::Node::SPtr root = m_baseGUI->getRootNode();
 

@@ -123,6 +123,13 @@ bool IOWindow::sanitizeName(std::string &name)
     return input != name;
 }
 
+
+void IOWindow::onBeginSimulationLoad()
+{
+    BaseWindow::onBeginSimulationLoad();
+    m_selectableData.clear();
+}
+
 void IOWindow::internalShowWindow()
 {
     static const char* items[]{

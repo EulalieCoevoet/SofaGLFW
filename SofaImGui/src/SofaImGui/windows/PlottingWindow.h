@@ -89,7 +89,7 @@ class SOFAIMGUI_API PlottingWindow : public BaseWindow
     void internalShowWindow() override;
     void registerAndLoadWindowSettings() override;
 
-    void clearWindow() override;
+    void onBeginSimulationLoad() override;
     bool isEnabledByState() override {return !m_GUIData.empty();}
 
     void exportData();
@@ -98,6 +98,8 @@ class SOFAIMGUI_API PlottingWindow : public BaseWindow
     void showPlots();
     void showMenu();
     void showMenu(ImPlotPlot &plot, const sofa::Index &idSubplot);
+
+    void removeAllData();
 };
 
 }

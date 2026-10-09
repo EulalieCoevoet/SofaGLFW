@@ -64,8 +64,8 @@ class SOFAIMGUI_API MyRobotWindow : public BaseWindow
     Connection m_connection;
     std::map<Section, std::unordered_set<models::guidata::GUIData::SPtr>> m_sectionedGUIData;
 
+    void onBeginSimulationLoad() override;
     void internalShowWindow() override;
-    void clearWindow() override;
     bool isEnabledByState() override;
 
     bool isInEmptyGroup(const std::string &group);

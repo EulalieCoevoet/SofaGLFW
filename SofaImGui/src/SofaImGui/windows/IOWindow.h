@@ -157,9 +157,9 @@ class SOFAIMGUI_API IOWindow : public BaseWindow
     bool m_isPublishing;
     bool m_isListening;
 
-    void internalShowWindow() override;
+    void onBeginSimulationLoad() override;
 
-    void clearWindow() override { m_selectableData.clear(); }
+    void internalShowWindow() override;
 
     /// Sanitize the input string to match ROS requirements for topic and node name (no spaces, no special characters)
     bool sanitizeName(std::string &name);
