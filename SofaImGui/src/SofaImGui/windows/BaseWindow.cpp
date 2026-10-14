@@ -37,6 +37,11 @@ BaseWindow::BaseWindow(std::string name)
     m_name = name;
 }
 
+void BaseWindow::onBeginSimulationLoad()
+{
+    clearGUIData();
+}
+
 void BaseWindow::onEndSimulationLoad()
 {
     registerAndLoadGUIDataWindowSettings();
