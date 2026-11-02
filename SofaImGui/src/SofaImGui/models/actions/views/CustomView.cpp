@@ -71,39 +71,33 @@ bool Custom::CustomView::showBlockInternal(const std::string &label,
 
     widgets::BlockNewLine();
 
-    { // Values
-        widgets::BeginBlockLine("start-end");
-        std::string idStart = "##startValue" + std::to_string(window->DC.CursorPos.x);
-        if (ImGui::InputDouble(idStart.c_str(), &custom.m_startValue, 0, 0, "%0.2f", ImGuiInputTextFlags_CharsNoBlank))
+    auto data = custom.m_data;
+
+    if (data && data->isValid())
+    {
+        const int dataSize = data->getData()->getValueTypeInfo()->size();
+        if (dataSize > 1)
         {
-            custom.computeSpeed();
-            hasValuesChanged = true;
+            // Index
+            widgets::BeginBlockLine("index");
+            std::string id = "##index" + std::to_string(window->DC.CursorPos.x);
+            int index = custom.m_index;
+            if (ImGui::InputInt(id.c_str(), &index, 0, 0))
+            {
+                if (dataSize <= index)
+                    index = dataSize - 1;
+                if (index < 0)
+                    index = 0;
+                custom.m_index = index;
+                hasValuesChanged = true;
+            }
+            ImGui::SetItemTooltip("Index in the vector (size: %i)", dataSize);
+            widgets::EndBlockLine();
         }
-        ImGui::SetItemTooltip("Start value");
-
-        ImGui::SameLine();
-        ImGui::PushStyleColor(ImGuiCol_Text, ProgramColors().Text);
-        ImGui::Text("-");
-        ImGui::PopStyleColor();
-        ImGui::SameLine();
-
-        std::string idEnd = "##endValue" + std::to_string(window->DC.CursorPos.x);
-        if (ImGui::InputDouble(idEnd.c_str(), &custom.m_endValue, 0, 0, "%0.2f", ImGuiInputTextFlags_CharsNoBlank))
-        {
-            custom.computeSpeed();
-            hasValuesChanged = true;
-        }
-        ImGui::SetItemTooltip("End Value");
-
-        widgets::EndBlockLine();
     }
-
-    widgets::BlockNewLine();
 
     { // Data
         widgets::BeginBlockLine("data");
-
-        auto data = custom.m_data;
         std::string label = (data && data->isValid())? data->getLabel(): "drop a data here";
         std::string tooltip = (data && data->isValid())? data->getData()->getPathName(): "Data";
 
@@ -132,6 +126,35 @@ bool Custom::CustomView::showBlockInternal(const std::string &label,
             }
             ImGui::EndDragDropTarget();
         }
+        widgets::EndBlockLine();
+    }
+
+    widgets::BlockNewLine();
+
+    { // Values
+        widgets::BeginBlockLine("start-end");
+        std::string idStart = "##startValue" + std::to_string(window->DC.CursorPos.x);
+        if (ImGui::InputDouble(idStart.c_str(), &custom.m_startValue, 0, 0, "%0.2f", ImGuiInputTextFlags_CharsNoBlank))
+        {
+            custom.computeSpeed();
+            hasValuesChanged = true;
+        }
+        ImGui::SetItemTooltip("Start value");
+
+        ImGui::SameLine();
+        ImGui::PushStyleColor(ImGuiCol_Text, ProgramColors().Text);
+        ImGui::Text("-");
+        ImGui::PopStyleColor();
+        ImGui::SameLine();
+
+        std::string idEnd = "##endValue" + std::to_string(window->DC.CursorPos.x);
+        if (ImGui::InputDouble(idEnd.c_str(), &custom.m_endValue, 0, 0, "%0.2f", ImGuiInputTextFlags_CharsNoBlank))
+        {
+            custom.computeSpeed();
+            hasValuesChanged = true;
+        }
+        ImGui::SetItemTooltip("End Value");
+
         widgets::EndBlockLine();
     }
 
