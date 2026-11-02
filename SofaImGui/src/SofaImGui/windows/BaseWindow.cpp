@@ -155,26 +155,30 @@ void BaseWindow::showInfoMessage(const char* message)
     ImGui::EndDisabled();
 }
 
-void BaseWindow::dropGUIData()
+models::guidata::GUIData::SPtr BaseWindow::getDroppedGUIData()
 {
+    models::guidata::GUIData::SPtr data{nullptr};
+
     if (ImGui::BeginDragDropTarget())
     {
         if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("_DATAWIDGET"))
         {
-            sofa::core::objectmodel::BaseData* data = static_cast<sofa::core::objectmodel::BaseData*>(payload->Data);
-            if (data)
+            sofa::core::objectmodel::BaseData* droppedData = static_cast<sofa::core::objectmodel::BaseData*>(payload->Data);
+            if (droppedData)
             {
-                addData(data->getName(),
-                        std::pair<sofa::core::BaseData*, bool>(data, false),
-                        std::pair<sofa::core::BaseData*, bool>(nullptr, false),
-                        std::pair<sofa::core::BaseData*, bool>(nullptr, false),
-                        data->getOwner()? data->getOwner()->getPathName(): models::guidata::GUIData::DEFAULTGROUP,
-                        data->getHelp());
+                data = addData(droppedData->getName(),
+                               std::pair<sofa::core::BaseData*, bool>(droppedData, false),
+                               std::pair<sofa::core::BaseData*, bool>(nullptr, false),
+                               std::pair<sofa::core::BaseData*, bool>(nullptr, false),
+                               models::guidata::GUIData::DEFAULTGROUP,
+                               droppedData->getHelp());
                 resetGUIDataWindowSettings();
             }
         }
         ImGui::EndDragDropTarget();
     }
+
+    return data;
 }
 
 void BaseWindow::removeGUIData(models::guidata::GUIData::SPtr data)
@@ -186,6 +190,12 @@ void BaseWindow::removeGUIData(models::guidata::GUIData::SPtr data)
 void BaseWindow::clearGUIData()
 {
     models::guidata::GUIDataManager::clearGUIData();
+    resetGUIDataWindowSettings();
+}
+
+void BaseWindow::changeGUIDataGroup(models::guidata::GUIData::SPtr data, const std::string& group)
+{
+    models::guidata::GUIDataManager::changeGUIDataGroup(data, group);
     resetGUIDataWindowSettings();
 }
 
@@ -202,6 +212,8 @@ void BaseWindow::registerAndLoadGUIDataWindowSettings()
         for (auto i=0; i<m_ws_guiDataSize; i++)
         {
             std::string guiDataPath = windowsSettings.getSetting(m_name.c_str(), (WS_WINDOWS_GUIDATA+std::to_string(i)).c_str(), std::string());
+            std::string guiDataGroup = windowsSettings.getSetting(m_name.c_str(), (WS_WINDOWS_GUIDATA+std::to_string(i)+"Group").c_str(), std::string());
+
             if (!guiDataPath.empty())
             {
                 sofa::core::BaseData* data;
@@ -211,7 +223,7 @@ void BaseWindow::registerAndLoadGUIDataWindowSettings()
                             std::pair<sofa::core::BaseData*, bool>(data, false),
                             std::pair<sofa::core::BaseData*, bool>(nullptr, nullptr),
                             std::pair<sofa::core::BaseData*, bool>(nullptr, nullptr),
-                            data->getOwner()->getPathName(),
+                            guiDataGroup,
                             data->getHelp());
                 }
             }
@@ -233,7 +245,10 @@ void BaseWindow::resetGUIDataWindowSettings()
     for (auto it=m_GUIData.begin(); it!=m_GUIData.end(); it++)
     {
         if (it->get() && it->get()->isValid())
-            windowsSettings.setSetting(m_name.c_str(), (WS_WINDOWS_GUIDATA+std::to_string(i++)).c_str(), it->get()->getData()->getPathName());
+        {
+            windowsSettings.setSetting(m_name.c_str(), (WS_WINDOWS_GUIDATA+std::to_string(i)).c_str(), it->get()->getData()->getPathName());
+            windowsSettings.setSetting(m_name.c_str(), (WS_WINDOWS_GUIDATA+std::to_string(i++)+"Group").c_str(), it->get()->getGroup());
+        }
     }
 }
 
