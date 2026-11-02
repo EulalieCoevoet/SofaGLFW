@@ -20,7 +20,6 @@
  * Contact information: contact@sofa-framework.org                             *
  ******************************************************************************/
 
-#include "IconsFontAwesome6.h"
 #include <SofaImGui/models/actions/Custom.h>
 #include <SofaImGui/FooterStatusBar.h>
 
@@ -60,7 +59,12 @@ bool Custom::apply(RigidCoord &position, const double &time)
         auto d = m_data->getData();
         double alpha = time / m_duration;
         double value = (1-alpha) * m_startValue + alpha * m_endValue;
-        d->getValueTypeInfo()->setScalarValue(d->beginEditVoidPtr(), 0, value);
+        int dataSize = d->getValueTypeInfo()->size();
+        if (dataSize <= m_index)
+            m_index=dataSize-1;
+        if (0 > m_index)
+            m_index=0;
+        d->getValueTypeInfo()->setScalarValue(d->beginEditVoidPtr(), m_index, value);
         d->endEditVoidPtr();
     }
 
