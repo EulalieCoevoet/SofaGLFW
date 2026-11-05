@@ -79,8 +79,8 @@ void PluginsWindow::internalShowWindow()
             ImGui::TextWrapped("A plugin can be loaded by either:");
             ImGui::TextWrapped("\t 1. adding the component RequiredPlugin in the scene");
             ImGui::TextWrapped("\t 2. using the - l option of the runSofa command");
-            ImGui::TextWrapped("\t 3. adding the plugin to the default plugins config file");
-            ImGui::TextWrapped("\t 4. adding the plugin from the Plugins Manager");
+            ImGui::TextWrapped("\t 3. adding the plugin from the Plugins Manager");
+            ImGui::TextWrapped("\t 4. adding the plugin to the default plugins config file: %s", configPluginPath.c_str());
             ImGui::PopStyleColor();
         }
         ImGui::EndChild();
