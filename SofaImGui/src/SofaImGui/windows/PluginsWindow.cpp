@@ -55,9 +55,16 @@ void PluginsWindow::beforeShowWindow()
 
 void PluginsWindow::internalShowWindow()
 {
-    static std::string configPluginPath = "plugin_list.conf.default";
-
+    static std::string configPluginPath = "plugin_list.conf"; // Used in generated binaries
+    static std::string configPluginPathDefault = "plugin_list.conf.default"; // Used when compiling from source
+    // These filenames are defined in a cmake file and a post install script. TODO (Sofa): store in a variable
     static bool configExists = (sofa::helper::system::PluginRepository.findFile(configPluginPath, "", nullptr));
+    if (!configExists && configPluginPath!=configPluginPathDefault)
+    {
+        configPluginPath = configPluginPathDefault;
+        configExists = (sofa::helper::system::PluginRepository.findFile(configPluginPath, "", nullptr));
+    }
+
     static sofa::type::vector<std::string> listDefaultPlugins = (configExists)? getPluginsFromIniFile(configPluginPath): sofa::type::vector<std::string>();
     const ImVec4 highlightColor = ImGui::GetStyleColorVec4(ImGuiCol_ButtonActive);
     static bool isSelectedPluginDefault;
