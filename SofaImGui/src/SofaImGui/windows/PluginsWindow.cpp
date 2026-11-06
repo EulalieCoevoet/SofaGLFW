@@ -80,7 +80,14 @@ void PluginsWindow::internalShowWindow()
             ImGui::TextWrapped("\t 1. adding the component RequiredPlugin in the scene");
             ImGui::TextWrapped("\t 2. using the - l option of the runSofa command");
             ImGui::TextWrapped("\t 3. adding the plugin from the Plugins Manager");
-            ImGui::TextWrapped("\t 4. adding the plugin to the default plugins config file: %s", configPluginPath.c_str());
+
+            ImGui::TextWrapped("\t 4. adding the plugin to the ");
+            ImGui::SameLine(0, 0);
+            ImGui::TextLink("default plugins config file");
+            ImGui::SetItemTooltip("%s", configPluginPath.c_str());
+            if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+                sofa::helper::system::FileSystem::openFileWithDefaultApplication(configPluginPath);
+
             ImGui::PopStyleColor();
         }
         ImGui::EndChild();
@@ -172,7 +179,7 @@ void PluginsWindow::internalShowWindow()
                             std::ofstream outfile(configPluginPath.c_str(), std::ios_base::app);
                             if (outfile.is_open())
                             {
-                                FooterStatusBar::getInstance().setTempMessage("Saving default plugins file: " + configPluginPath);
+                                FooterStatusBar::getInstance().setTempMessage("Saving default plugins file:", FooterStatusBar::MINFO, configPluginPath);
                                 outfile << "\n" << pluginIt->second.getModuleName() << " " << pluginIt->second.getModuleVersion();
                                 outfile.close();
 
