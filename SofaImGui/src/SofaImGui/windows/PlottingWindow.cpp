@@ -229,7 +229,6 @@ void PlottingWindow::showButtons()
 void PlottingWindow::showPlots()
 {
     static sofaimgui::models::guidata::GUIData::SPtr dragedData;
-    ImPlotContext& gp = *GImPlot;
 
     ImGui::PushStyleColor(ImGuiCol_FrameBg, COLOR_TRANSPARENT);
 
@@ -252,10 +251,6 @@ void PlottingWindow::showPlots()
                 ImPlot::SetupAxes("Time (s)", nullptr,
                                   ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoSideSwitch | ImPlotAxisFlags_NoHighlight,
                                   ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoSideSwitch | ImPlotAxisFlags_NoHighlight);
-
-                bool isHovered = ImPlot::IsPlotHovered();
-                if (isHovered)
-                    ImPlot::PushStyleColor(ImPlotCol_LegendText, ImGui::GetColorU32(COLOR_BLUE));
 
                 for (auto& data: plots)
                 {
@@ -287,9 +282,6 @@ void PlottingWindow::showPlots()
                         }
                     }
                 }
-
-                if (isHovered)
-                    ImPlot::PopStyleColor();
 
                 if (ImPlot::BeginDragDropTargetPlot())
                 {
