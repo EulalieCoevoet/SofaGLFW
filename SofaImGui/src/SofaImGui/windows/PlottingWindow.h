@@ -92,7 +92,7 @@ class SOFAIMGUI_API PlottingWindow : public BaseWindow
     void showButtons();
     void showPlots();
     void showMenu();
-    void showMenu(ImPlotPlot &plot);
+    void showPlotMenu(ImPlotPlot &plot);
 
     void removeAllData();
 };

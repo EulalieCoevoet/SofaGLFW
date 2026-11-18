@@ -310,7 +310,7 @@ void PlottingWindow::showPlots()
                 if (ImGui::BeginPopup("##MyPlotContext"))
                 {
                     ImGui::PopStyleColor();
-                    showMenu(plot);
+                    showPlotMenu(plot);
                     ImGui::PushStyleColor(ImGuiCol_FrameBg, COLOR_TRANSPARENT);
                     ImGui::EndPopup();
                 }
@@ -336,30 +336,47 @@ void PlottingWindow::showMenu()
     ImGui::Separator();
 
     { // Plots display options
-        ImPlotContext& gp = *GImPlot;
-        auto& plots  = gp.Plots;
-        auto plot = plots.GetByIndex(0);
+        bool showMousePosition = ImGui::MenuItem("Show mouse position");
+        bool showGrid = ImGui::MenuItem("Show grid");
+        bool autofit = ImGui::MenuItem("Auto fit content");
+        ImGui::Indent();
+        bool autofitX = ImGui::MenuItem("x axis");
+        bool autofitY = ImGui::MenuItem("y axis");
+        ImGui::Unindent();
 
-        showMenu(*plot);
-
-        bool showMousePosition = !ImHasFlag(plot->Flags, ImPlotFlags_NoMouseText);
-        bool showGrid = !ImHasFlag(plot->XAxis(0).Flags, ImPlotAxisFlags_NoGridLines);
-        bool autofitX = ImHasFlag(plot->XAxis(0).Flags, ImPlotAxisFlags_AutoFit);
-        bool autofitY = ImHasFlag(plot->YAxis(0).Flags, ImPlotAxisFlags_AutoFit);
-
-        for (size_t i=0; i<(size_t)m_ws_nbRows * m_nbCols; i++)
+        if (showMousePosition || showGrid || autofit || autofitX || autofitY) // User clicked on one menu item
         {
-            auto plot = plots.GetByIndex(i);
-            showMousePosition ? plot->Flags &= ~ImPlotFlags_NoMouseText : plot->Flags |= ImPlotFlags_NoMouseText;
-            showGrid ? plot->XAxis(0).Flags &= ~ImPlotAxisFlags_NoGridLines : plot->XAxis(0).Flags |= ImPlotAxisFlags_NoGridLines;
-            showGrid ? plot->YAxis(0).Flags &= ~ImPlotAxisFlags_NoGridLines : plot->YAxis(0).Flags |= ImPlotAxisFlags_NoGridLines;
-            !autofitX ? plot->XAxis(0).Flags &= ~ImPlotAxisFlags_AutoFit : plot->XAxis(0).Flags |= ImPlotAxisFlags_AutoFit;
-            !autofitY ? plot->YAxis(0).Flags &= ~ImPlotAxisFlags_AutoFit : plot->YAxis(0).Flags |= ImPlotAxisFlags_AutoFit;
+            ImPlotContext& gp = *GImPlot;
+            auto& plots  = gp.Plots;
+            for (size_t i=0; i<(size_t)m_ws_nbRows * m_nbCols; i++)
+            {
+                auto plot = plots.GetByIndex(i);
+                if (showMousePosition)
+                    plot->Flags &= ~ImPlotFlags_NoMouseText;
+
+                if (showGrid)
+                {
+                    plot->XAxis(0).Flags &= ~ImPlotAxisFlags_NoGridLines;
+                    plot->YAxis(0).Flags &= ~ImPlotAxisFlags_NoGridLines;
+                }
+
+                if (autofit)
+                {
+                    plot->XAxis(0).Flags |= ImPlotAxisFlags_AutoFit;
+                    plot->YAxis(0).Flags |= ImPlotAxisFlags_AutoFit;
+                }
+
+                if (autofitX)
+                    plot->XAxis(0).Flags |= ImPlotAxisFlags_AutoFit;
+
+                if (autofitY)
+                    plot->YAxis(0).Flags |= ImPlotAxisFlags_AutoFit;
+            }
         }
     }
 }
 
-void PlottingWindow::showMenu(ImPlotPlot &plot)
+void PlottingWindow::showPlotMenu(ImPlotPlot &plot)
 {
     ImGui::PushID(plot.ID);
 
