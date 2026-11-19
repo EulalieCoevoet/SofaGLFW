@@ -315,12 +315,12 @@ void SceneGraphWindow::internalShowWindow()
     if (m_showSearch)
     {
         ImGui::SameLine();
-        filter.Draw("Search");
+        filter.DrawWithHint("##Search", "search...");
     }
     if (m_showFiltered)
     {
         ImGui::SameLine();
-        filter.Draw("Filter");
+        filter.DrawWithHint("##Filter", "filter...");
         ImGui::SameLine();
         ImGui::PushStyleColor(ImGuiCol_ButtonText, ImVec4(1.f, 0.3f, 0.3f, 1.f));
         sofaimgui::widgets::PushButton(ICON_FA_CIRCLE_EXCLAMATION, &m_showFilteredError);
@@ -433,7 +433,7 @@ void SceneGraphWindow::showNode(sofa::simulation::Node* parent, sofa::simulation
     const auto& nodeName = node->getName();
     const bool& isDeactivated = !node->is_activated.getValue();
     const bool isNodeSelected = m_selection.contains(node) && !m_renaming;
-    const bool isNodeHighlighted = !filter.Filters.empty() && filter.PassFilter(nodeName.c_str()) && (m_showSearch || m_showFiltered) && !m_renaming;
+    const bool isNodeHighlighted = filter.IsActive() && filter.PassFilter(nodeName.c_str()) && (m_showSearch || m_showFiltered) && !m_renaming;
 
     if (isDeactivated)
         ImGui::PushStyleColor(ImGuiCol_Text, ImGui::GetColorU32(ImGuiCol_TextDisabled));
@@ -592,11 +592,11 @@ void SceneGraphWindow::showNodeComponents(sofa::simulation::Node* node, const Im
             isObjectFiltered = isObjectFiltered || (objectMessage == "warning");
         if (m_showFilteredInfo)
             isObjectFiltered = isObjectFiltered || (objectMessage == "info");
-        if (!onlySpecial || (isObjectFiltered && !filter.Filters.empty()))
+        if (!onlySpecial || (isObjectFiltered && filter.IsActive()))
             isObjectFiltered = (filter.PassFilter(objectName.c_str()) || filter.PassFilter(objectClassName.c_str()));
 
-        const bool isObjectHighlighted = (!filter.Filters.empty() || (onlySpecial && m_showFiltered)) && isObjectFiltered && (m_showSearch || m_showFiltered);
-        const bool isObjectHidden = (!filter.Filters.empty() || onlySpecial) && !isObjectFiltered && m_showFiltered;
+        const bool isObjectHighlighted = (filter.IsActive() || (onlySpecial && m_showFiltered)) && isObjectFiltered && (m_showSearch || m_showFiltered);
+        const bool isObjectHidden = (filter.IsActive() || onlySpecial) && !isObjectFiltered && m_showFiltered;
 
         if (!isObjectHidden)
         {
@@ -698,7 +698,7 @@ void SceneGraphWindow::showNodeComponents(sofa::simulation::Node* node, const Im
                     const auto& slaveName = slave->getName();
                     const auto slaveClassName = slave->getClassName();
                     const bool isSlaveSelected = m_selection.contains(slave.get());
-                    const bool isSlaveFiltered = !filter.Filters.empty() && (filter.PassFilter(slaveName.c_str()) || filter.PassFilter(slaveClassName.c_str()));
+                    const bool isSlaveFiltered = filter.IsActive() && (filter.PassFilter(slaveName.c_str()) || filter.PassFilter(slaveClassName.c_str()));
                     const bool isSlaveHighlighted = isSlaveFiltered && (m_showSearch || m_showFiltered);
                     const bool isSlaveHidden = !isSlaveFiltered && m_showFiltered;
 

@@ -255,7 +255,6 @@ void ImGuiGUIEngine::init()
     {
         iniGUISettings.SetValue("Style", "darkMode", (m_darkMode)? "on": "off");
     }
-    applyDarkMode(m_darkMode);
 }
 
 void ImGuiGUIEngine::initBackend(GLFWwindow* glfwWindow)

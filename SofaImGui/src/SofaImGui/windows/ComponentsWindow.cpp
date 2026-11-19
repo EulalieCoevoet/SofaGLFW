@@ -105,7 +105,8 @@ void ComponentsWindow::showComponentsList(std::vector<sofa::core::ClassEntry::SP
 {
     ImGui::PushStyleVar(ImGuiStyleVar_FrameBorderSize, 1);
     static ImGuiTextFilter filter;
-    filter.Draw("##Filter", -1);
+    ImGui::SetNextItemWidth(-1);
+    filter.DrawWithHint("##Filter", "filter...");
     ImGui::SetItemTooltip("Filter by name");
     ImGui::PopStyleVar();
 

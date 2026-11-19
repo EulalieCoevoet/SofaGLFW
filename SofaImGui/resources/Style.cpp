@@ -67,7 +67,8 @@ void setStyleVars()
     style.HoverFlagsForTooltipMouse = ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_AllowWhenDisabled;
     style.HoverFlagsForTooltipNav = ImGuiHoveredFlags_DelayNormal | ImGuiHoveredFlags_AllowWhenDisabled;
 
-    ImGui::GetStyle().ScaleAllSizes(ImGui::GetWindowDpiScale() / 2.f);  // developped with scale = 200%
+    if (ImGui::GetWindowDpiScale() > 0)
+        ImGui::GetStyle().ScaleAllSizes(ImGui::GetWindowDpiScale() / 2.f);  // developped with scale = 200%
 }
 
 void setDeepDarkStyle()
@@ -113,9 +114,9 @@ void setDeepDarkStyle()
     colors[ImGuiCol_ResizeGripHovered]      = ImVec4(0.18f, 0.18f, 0.18f, 1.00f);
     colors[ImGuiCol_ResizeGripActive]       = ImVec4(0.48f, 0.48f, 0.48f, 1.00f);
     colors[ImGuiCol_Tab]                    = ImVec4(0.36f, 0.36f, 0.36f, 1.00f);
-    colors[ImGuiCol_TabUnfocused]           = ImVec4(0.36f, 0.36f, 0.36f, 1.00f);
-    colors[ImGuiCol_TabActive]              = ImColor(COLOR_DARK_BLUE);
-    colors[ImGuiCol_TabUnfocusedActive]     = ImColor(COLOR_DARK_BLUE);
+    colors[ImGuiCol_TabDimmed]              = ImVec4(0.36f, 0.36f, 0.36f, 1.00f);
+    colors[ImGuiCol_TabSelected]            = ImColor(COLOR_DARK_BLUE);
+    colors[ImGuiCol_TabDimmedSelected]      = ImColor(COLOR_DARK_BLUE);
     colors[ImGuiCol_TabHovered]             = ImVec4(0.14f, 0.25f, 0.42f, 0.75f);
     colors[ImGuiCol_TableHeaderBg]          = ImVec4(0.14f, 0.14f, 0.14f, 0.55f);
     colors[ImGuiCol_TableBorderStrong]      = ImVec4(0.00f, 0.00f, 0.00f, 0.55f);
@@ -173,9 +174,9 @@ void setLightStyle()
     colors[ImGuiCol_ResizeGripActive]       = ImVec4(0.70f, 0.70f, 0.70f, 1.00f);
     colors[ImGuiCol_TextSelectedBg]         = ImVec4(0.26f, 0.59f, 0.98f, 0.35f);
     colors[ImGuiCol_Tab]                    = ImColor(COLOR_GREY);
-    colors[ImGuiCol_TabUnfocused]           = ImColor(COLOR_GREY);
-    colors[ImGuiCol_TabActive]              = ImColor(COLOR_DARK_BLUE);
-    colors[ImGuiCol_TabUnfocusedActive]     = ImColor(COLOR_DARK_BLUE);
+    colors[ImGuiCol_TabDimmed]              = ImColor(COLOR_GREY);
+    colors[ImGuiCol_TabSelected]            = ImColor(COLOR_DARK_BLUE);
+    colors[ImGuiCol_TabDimmedSelected]      = ImColor(COLOR_DARK_BLUE);
     colors[ImGuiCol_TabHovered]             = ImVec4(0.14f, 0.25f, 0.42f, 0.75f);
     colors[ImGuiCol_TableBorderStrong]      = ImVec4(0.80f, 0.80f, 0.80f, 0.55f);
     colors[ImGuiCol_TableBorderLight]       = ImVec4(0.28f, 0.28f, 0.28f, 0.25f);

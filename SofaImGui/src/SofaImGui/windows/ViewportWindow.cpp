@@ -192,8 +192,8 @@ void ViewportWindow::addCameraButtons()
             }
         }
     }
-    ImGui::PopStyleColor();
     ImGui::EndChild();
+    ImGui::PopStyleColor();
 
     position = ImVec2(ImGui::GetWindowPos().x, ImGui::GetWindowPos().y + frameGizmoSize);
 
@@ -204,7 +204,7 @@ void ViewportWindow::addCameraButtons()
 
     // Left buttons background
     // Clip down
-    auto color = ImGui::GetStyle().Colors[ImGuiCol_TabActive];
+    auto color = ImGui::GetStyle().Colors[ImGuiCol_TabSelected];
     color.w = 0.6f;
     ImGui::PushClipRect(ImVec2(ImGui::GetWindowContentRegionMin().x, ImGui::GetWindowContentRegionMin().y),
                         ImVec2(ImGui::GetWindowContentRegionMax().x + ImGui::GetWindowPos().x,
@@ -475,7 +475,7 @@ bool ViewportWindow::addAnimateButton(bool *animate, const float &shift_x)
 
                 // Middle buttons background
                 // Clip down
-                auto color = ImGui::GetStyle().Colors[ImGuiCol_TabActive];
+                auto color = ImGui::GetStyle().Colors[ImGuiCol_TabSelected];
                 color.w = 0.6f;
                 ImGui::PushStyleVar(ImGuiStyleVar_ChildBorderSize, 1); // Work around to add padding
                 ImGui::PushStyleColor(ImGuiCol_ChildBg, ImGui::GetColorU32(color));

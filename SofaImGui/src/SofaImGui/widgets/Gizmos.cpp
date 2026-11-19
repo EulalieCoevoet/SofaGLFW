@@ -118,7 +118,7 @@ bool drawEllipse(float* viewProjection, const ImVec2& center,
         }
     }
 
-    config.mDrawList->AddPolyline(points, segmentCount, ((isHovered && hoverable) || isClicked)? ImGui::GetColorU32(config.hoverColor) : color, true, thickness);
+    config.mDrawList->AddPolyline(points, segmentCount, ((isHovered && hoverable) || isClicked)? ImGui::GetColorU32(config.hoverColor) : color, thickness, ImDrawFlags_Closed);
     return isHovered;
 }
 
