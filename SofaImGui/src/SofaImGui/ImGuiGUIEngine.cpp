@@ -507,8 +507,7 @@ void ImGuiGUIEngine::initDockSpace(const bool& resizeDocks)
     ImGui::DockSpace(dockspaceID, ImVec2(0.0f, 0.0f), ImGuiDockNodeFlags_None);
 
     static bool initialized = false;
-    ImVec2 displaySize = ImGui::GetMainViewport()->Size;
-    if ((!initialized || resizeDocks) && displaySize.x > 0. && displaySize.y > 0.)
+    if ((!initialized || resizeDocks) && viewport->Size.x > 0. && viewport->Size.y > 0.)
     {
         initialized = true;
         ImGui::DockBuilderRemoveNode(dockspaceID); // clear any previous layout
